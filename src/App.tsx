@@ -354,6 +354,27 @@ const mosaicClasses = [
 
 const newsTileClasses = ["tile-large", "tile-wide", "tile-tall", "tile-compact"];
 
+const aboutHighlights = [
+  {
+    title: "Regularização fundiária",
+    text: "Apoio a famílias e comunidades em processos de REURB, Lar Legal e orientação documental.",
+  },
+  {
+    title: "Habitação urbana e rural",
+    text: "Atendimento voltado a programas habitacionais, moradia digna e desenvolvimento sustentável.",
+  },
+  {
+    title: "Informação pública",
+    text: "Matérias, fotos e vídeos organizados para visitantes acompanharem entregas, ações e comunicados.",
+  },
+];
+
+const aboutSteps = [
+  "Identificação da necessidade habitacional ou fundiária.",
+  "Orientação sobre documentos, programas e próximos passos.",
+  "Acompanhamento das ações, entregas e notícias pelo portal.",
+];
+
 function getStableVariant(value: string, index: number, variants: string[]) {
   const seed = Array.from(value).reduce(
     (sum, character) => sum + character.charCodeAt(0),
@@ -364,7 +385,7 @@ function getStableVariant(value: string, index: number, variants: string[]) {
 
 function SiteFooter() {
   return (
-    <footer className="site-footer">
+    <footer className="site-footer" id="contatos">
       <div className="footer-about">
         <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
         <p>
@@ -410,10 +431,16 @@ function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
             A ADEHASC atua para aproximar a população do acesso à habitação, à informação
             habitacional e ao lar regularizado em Santa Catarina.
           </p>
-          <button className="primary-button" onClick={onOpenNews} type="button">
-            <Newspaper size={18} />
-            Ver notícias
-          </button>
+          <div className="about-actions">
+            <button className="primary-button" onClick={onOpenNews} type="button">
+              <Newspaper size={18} />
+              Ver notícias
+            </button>
+            <a className="ghost-button" href="#contatos">
+              <Phone size={17} />
+              Contatos
+            </a>
+          </div>
         </div>
 
         <div className="about-card">
@@ -422,30 +449,46 @@ function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
             Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina
           </strong>
           <span>CNPJ 78.486.875/0001-32</span>
+          <div className="about-card-list">
+            <span>
+              <MapPin size={16} />
+              Santa Catarina e atendimento regional
+            </span>
+            <span>
+              <CheckCircle2 size={16} />
+              Visitantes acompanham conteúdos em modo leitura
+            </span>
+          </div>
         </div>
       </section>
 
       <section className="about-info-grid" aria-label="Informações da ADEHASC">
+        {aboutHighlights.map((item) => (
+          <article key={item.title}>
+            <span>{item.title}</span>
+            <p>{item.text}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="about-details">
         <article>
-          <span>Missão</span>
+          <span>Como a ADEHASC ajuda</span>
+          <h2>Atendimento mais próximo, informação mais clara.</h2>
           <p>
-            Desenvolver atividades para suprir a necessidade de habitação da população e
-            aproximar famílias do lar regularizado.
+            O portal reúne as ações da associação em um só lugar. A população pode acompanhar
+            notícias, entregas de matrículas, projetos em andamento e registros em foto ou vídeo.
           </p>
         </article>
-        <article>
-          <span>Atuação</span>
-          <p>
-            Apoio em regularização fundiária, orientação habitacional e programas voltados à
-            habitação urbana e rural.
-          </p>
-        </article>
-        <article>
-          <span>Informação</span>
-          <p>
-            Notícias, matérias, fotos e vídeos ficam reunidos em um espaço público de consulta.
-          </p>
-        </article>
+
+        <ol className="about-steps">
+          {aboutSteps.map((step) => (
+            <li key={step}>
+              <CheckCircle2 size={18} />
+              <span>{step}</span>
+            </li>
+          ))}
+        </ol>
       </section>
     </div>
   );
