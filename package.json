@@ -1,0 +1,28 @@
+{
+  "name": "adehasc-site",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/prepare-dev.mjs && cross-env ADMIN_PASSWORD=adehasc-admin-local vite --host 0.0.0.0",
+    "netlify:dev": "npm run dev",
+    "build": "tsc && vite build && node scripts/write-redirects.mjs",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^10.0.10",
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^3.0.4",
+    "@netlify/vite-plugin": "^2.0.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.3"
+  }
+}
