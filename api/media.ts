@@ -1,8 +1,66 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
-import { authorizeAdmin } from "./_auth";
-import { readJsonBody, sendJson, type ApiRequest, type ApiResponse } from "./_http";
+import type { IncomingMessage, ServerResponse } from "node:http";
+
+type ApiRequest = IncomingMessage & {
+  body?: unknown;
+};
+
+type ApiResponse = ServerResponse;
 
 const maxUploadBytes = 250 * 1024 * 1024;
+
+function getHeader(req: ApiRequest, name: string) {
+  const value = req.headers[name.toLowerCase()];
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function sendJson(res: ApiResponse, status: number, data: unknown) {
+  res.statusCode = status;
+  res.setHeader("content-type", "application/json; charset=utf-8");
+  res.setHeader("cache-control", "no-store");
+  res.end(JSON.stringify(data));
+}
+
+async function readJsonBody<T>(req: ApiRequest): Promise<T> {
+  if (typeof req.body === "string") {
+    return JSON.parse(req.body) as T;
+  }
+
+  if (Buffer.isBuffer(req.body)) {
+    return JSON.parse(req.body.toString("utf8")) as T;
+  }
+
+  if (req.body && typeof req.body === "object") {
+    return req.body as T;
+  }
+
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  const text = Buffer.concat(chunks).toString("utf8");
+  return (text ? JSON.parse(text) : {}) as T;
+}
+
+function authorizeAdmin(req: ApiRequest, res: ApiResponse) {
+  const configuredPassword = process.env.ADMIN_PASSWORD || "";
+
+  if (!configuredPassword) {
+    sendJson(res, 503, {
+      error: "ADMIN_PASSWORD ainda não foi configurada no Vercel. Defina a variável de ambiente para ativar uploads.",
+    });
+    return false;
+  }
+
+  if (getHeader(req, "x-admin-password") !== configuredPassword) {
+    sendJson(res, 401, { error: "Senha ADM inválida." });
+    return false;
+  }
+
+  return true;
+}
 
 function assertValidPathname(pathname: string) {
   const cleanPathname = pathname.replace(/\\/g, "/");
@@ -35,7 +93,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return;
   }
 
-  if (!authorizeAdmin(req, res, "uploads")) {
+  if (!authorizeAdmin(req, res)) {
     return;
   }
 
@@ -62,4 +120,3 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     sendError(res, error);
   }
 }
-

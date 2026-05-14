@@ -1,12 +1,147 @@
 import { randomUUID } from "node:crypto";
-import { authorizeAdmin } from "./_auth";
-import { getHeader, getQueryValue, readJsonBody, sendJson, type ApiRequest, type ApiResponse } from "./_http";
-import { loadPosts, writePosts } from "./_posts-store";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { get, put } from "@vercel/blob";
 import type { MediaItem, MediaType, Post, PostStatus } from "../src/types";
 
 type PostPayload = Partial<Post> & {
   media?: unknown;
 };
+
+type ApiRequest = IncomingMessage & {
+  body?: unknown;
+  query?: Record<string, string | string[] | undefined>;
+};
+
+type ApiResponse = ServerResponse;
+
+const postsKey = "adehasc/posts.json";
+
+const seedPosts: Post[] = [
+  {
+    id: "boas-vindas",
+    title: "ADEHASC amplia o acesso à informação habitacional",
+    category: "Institucional",
+    excerpt:
+      "Um espaço digital para publicar matérias, fotos e vídeos sobre desenvolvimento habitacional sustentável em Santa Catarina.",
+    body:
+      "Este portal foi preparado para receber notícias, comunicados, galerias de fotos e vídeos da ADEHASC. Visitantes podem acompanhar todas as matérias publicadas, enquanto a administração gerencia o conteúdo pelo painel ADM.",
+    cover: "/adehasc-logo.png",
+    status: "published",
+    featured: true,
+    media: [],
+    createdAt: "2026-05-04T12:00:00.000Z",
+    updatedAt: "2026-05-04T12:00:00.000Z",
+  },
+];
+
+function getHeader(req: ApiRequest, name: string) {
+  const value = req.headers[name.toLowerCase()];
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function getQueryValue(req: ApiRequest, key: string) {
+  const queryValue = req.query?.[key];
+
+  if (Array.isArray(queryValue)) {
+    return queryValue[0] || "";
+  }
+
+  if (queryValue) {
+    return queryValue;
+  }
+
+  const url = new URL(req.url || "", "http://localhost");
+  return url.searchParams.get(key) || "";
+}
+
+function sendJson(res: ApiResponse, status: number, data: unknown) {
+  res.statusCode = status;
+  res.setHeader("content-type", "application/json; charset=utf-8");
+  res.setHeader("cache-control", "no-store");
+  res.end(JSON.stringify(data));
+}
+
+async function readJsonBody<T>(req: ApiRequest): Promise<T> {
+  if (typeof req.body === "string") {
+    return JSON.parse(req.body) as T;
+  }
+
+  if (Buffer.isBuffer(req.body)) {
+    return JSON.parse(req.body.toString("utf8")) as T;
+  }
+
+  if (req.body && typeof req.body === "object") {
+    return req.body as T;
+  }
+
+  const chunks: Buffer[] = [];
+
+  for await (const chunk of req) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+
+  const text = Buffer.concat(chunks).toString("utf8");
+  return (text ? JSON.parse(text) : {}) as T;
+}
+
+function authorizeAdmin(req: ApiRequest, res: ApiResponse) {
+  const configuredPassword = process.env.ADMIN_PASSWORD || "";
+
+  if (!configuredPassword) {
+    sendJson(res, 503, {
+      error: "ADMIN_PASSWORD ainda não foi configurada no Vercel. Defina a variável de ambiente para ativar o painel ADM.",
+    });
+    return false;
+  }
+
+  if (getHeader(req, "x-admin-password") !== configuredPassword) {
+    sendJson(res, 401, { error: "Senha ADM inválida." });
+    return false;
+  }
+
+  return true;
+}
+
+function hasBlobToken() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+async function loadPosts() {
+  if (!hasBlobToken()) {
+    return seedPosts;
+  }
+
+  try {
+    const stored = await get(postsKey, { access: "private", useCache: false });
+
+    if (!stored || stored.statusCode !== 200 || !stored.stream) {
+      return seedPosts;
+    }
+
+    const text = await new Response(stored.stream).text();
+    const posts = JSON.parse(text);
+    return Array.isArray(posts) ? (posts as Post[]) : seedPosts;
+  } catch (error) {
+    console.error("Nao foi possivel carregar posts no Vercel Blob.", error);
+    return seedPosts;
+  }
+}
+
+async function writePosts(posts: Post[]) {
+  if (!hasBlobToken()) {
+    const error = new Error(
+      "BLOB_READ_WRITE_TOKEN ainda não foi configurada no Vercel. Conecte um Blob Store ao projeto para salvar matérias.",
+    );
+    throw Object.assign(error, { statusCode: 503 });
+  }
+
+  await put(postsKey, JSON.stringify(posts, null, 2), {
+    access: "private",
+    allowOverwrite: true,
+    cacheControlMaxAge: 60,
+    contentType: "application/json",
+  });
+}
 
 function cleanString(value: unknown, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
@@ -125,4 +260,3 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     sendError(res, error);
   }
 }
-
