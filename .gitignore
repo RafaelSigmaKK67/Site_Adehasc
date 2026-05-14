@@ -1,6 +1,8 @@
 node_modules
 dist
 .netlify
+.vercel
+.data
 .env
 .env.*
 *.log

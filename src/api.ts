@@ -1,14 +1,14 @@
+import { upload as uploadBlob } from "@vercel/blob/client";
 import type { MediaItem, Post, PostInput } from "./types";
 
 const jsonHeaders = {
   "Content-Type": "application/json",
 };
 
-const maxImageUploadBytes = 8 * 1024 * 1024;
-const maxVideoUploadBytes = 4 * 1024 * 1024;
+const maxUploadBytes = 250 * 1024 * 1024;
 
 export const uploadGuidance =
-  "Upload direto aceita fotos até 8 MB e vídeos pequenos até 4 MB. Para vídeos maiores, publique no YouTube/Vimeo/Drive e cole a URL pública.";
+  "Upload direto usa Vercel Blob e aceita fotos e vídeos grandes. Para vídeos muito pesados, YouTube, Vimeo ou Drive continuam sendo boas opções.";
 
 async function readResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type") || "";
@@ -67,15 +67,6 @@ export async function deletePost(id: string, adminPassword: string): Promise<voi
   await readResponse<{ ok: true }>(response);
 }
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
-    reader.readAsDataURL(file);
-  });
-}
-
 function isVideoFile(file: File) {
   return file.type.startsWith("video") || /\.(mp4|webm|mov|m4v)$/i.test(file.name);
 }
@@ -84,34 +75,61 @@ function formatSize(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1).replace(".0", "")} MB`;
 }
 
+function safeFileName(value: string) {
+  return (value || "midia")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .toLowerCase();
+}
+
+function contentTypeFor(file: File) {
+  if (file.type) {
+    return file.type;
+  }
+
+  if (/\.(mp4|m4v)$/i.test(file.name)) {
+    return "video/mp4";
+  }
+
+  if (/\.mov$/i.test(file.name)) {
+    return "video/quicktime";
+  }
+
+  if (/\.webm$/i.test(file.name)) {
+    return "video/webm";
+  }
+
+  return "application/octet-stream";
+}
+
 export async function uploadMedia(file: File, adminPassword: string): Promise<MediaItem> {
   const isVideo = isVideoFile(file);
-  const limit = isVideo ? maxVideoUploadBytes : maxImageUploadBytes;
 
-  if (file.size > limit) {
+  if (file.size > maxUploadBytes) {
     throw new Error(
-      isVideo
-        ? `O vídeo "${file.name}" tem ${formatSize(file.size)}. O upload direto aceita vídeos até ${formatSize(limit)}. Para vídeos maiores, publique no YouTube, Vimeo ou Drive e cole a URL pública.`
-        : `A imagem "${file.name}" tem ${formatSize(file.size)}. O limite para envio direto é ${formatSize(limit)}.`,
+      `O arquivo "${file.name}" tem ${formatSize(file.size)}. O limite para envio direto é ${formatSize(
+        maxUploadBytes,
+      )}. Para vídeos maiores, publique no YouTube, Vimeo ou Drive e cole a URL pública.`,
     );
   }
 
-  const dataUrl = await fileToDataUrl(file);
-  const encodedData = dataUrl.includes(",") ? dataUrl.split(",")[1] : dataUrl;
-
-  const response = await fetch("/api/media", {
-    method: "POST",
+  const fileName = safeFileName(file.name) || "midia";
+  const blob = await uploadBlob(`media/${Date.now()}-${crypto.randomUUID()}-${fileName}`, file, {
+    access: "public",
+    contentType: contentTypeFor(file),
+    handleUploadUrl: "/api/media",
     headers: {
-      ...jsonHeaders,
       "x-admin-password": adminPassword,
     },
-    body: JSON.stringify({
-      contentType: file.type || "application/octet-stream",
-      data: encodedData,
-      mediaType: isVideo ? "video" : "image",
-      name: file.name,
-    }),
+    multipart: isVideo || file.size > 5 * 1024 * 1024,
   });
-  const result = await readResponse<{ media: MediaItem }>(response);
-  return result.media;
+
+  return {
+    id: crypto.randomUUID(),
+    type: isVideo ? "video" : "image",
+    src: blob.url,
+    name: file.name,
+  };
 }
