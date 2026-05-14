@@ -1,22 +1,38 @@
 import {
+  ArrowRight,
+  BadgeCheck,
+  Building2,
+  CalendarDays,
   Camera,
   CheckCircle2,
+  ClipboardList,
   Ellipsis,
+  FileCheck2,
   FileText,
+  Globe,
+  Handshake,
+  HeartHandshake,
+  Home,
+  Landmark,
   LayoutDashboard,
   Lock,
   LogOut,
   Mail,
+  Map,
   MapPin,
   Newspaper,
   Phone,
   Pencil,
   Plus,
   RefreshCw,
+  Route,
   Save,
   Search,
+  Scale,
+  ShieldCheck,
   Trash2,
   UploadCloud,
+  Users,
   Video,
   X,
 } from "lucide-react";
@@ -354,25 +370,123 @@ const mosaicClasses = [
 
 const newsTileClasses = ["tile-large", "tile-wide", "tile-tall", "tile-compact"];
 
-const aboutHighlights = [
+const workAreas = [
   {
-    title: "Regularização fundiária",
-    text: "Apoio a famílias e comunidades em processos de REURB, Lar Legal e orientação documental.",
+    icon: Building2,
+    title: "REURB",
+    text: "Apoio técnico, jurídico, documental, social e organizacional em processos de Regularização Fundiária Urbana.",
   },
   {
-    title: "Habitação urbana e rural",
-    text: "Atendimento voltado a programas habitacionais, moradia digna e desenvolvimento sustentável.",
+    icon: Scale,
+    title: "Lar Legal",
+    text: "Acompanhamento de processos judiciais de regularização, com foco na matrícula individualizada.",
   },
   {
-    title: "Informação pública",
-    text: "Matérias, fotos e vídeos organizados para visitantes acompanharem entregas, ações e comunicados.",
+    icon: Users,
+    title: "Cadastro de moradores",
+    text: "Organização de informações, documentos, assinaturas e dados sociais necessários para cada núcleo.",
+  },
+  {
+    icon: Map,
+    title: "Topografia e mapas",
+    text: "Levantamentos técnicos, delimitação de núcleos, identificação de lotes e memoriais descritivos.",
+  },
+  {
+    icon: FileCheck2,
+    title: "Apoio documental",
+    text: "Cartas de anuência, contratos, declarações, peças técnicas e organização dos protocolos.",
+  },
+  {
+    icon: Home,
+    title: "Entrega de matrículas",
+    text: "Acompanhamento até a emissão e entrega organizada das matrículas, quando cumpridos os requisitos legais.",
   },
 ];
 
-const aboutSteps = [
-  "Identificação da necessidade habitacional ou fundiária.",
-  "Orientação sobre documentos, programas e próximos passos.",
-  "Acompanhamento das ações, entregas e notícias pelo portal.",
+const regularizationBenefits = [
+  "Segurança jurídica",
+  "Matrícula individualizada",
+  "Valorização do imóvel",
+  "Venda, transferência e herança com mais tranquilidade",
+  "Organização da comunidade",
+  "Fortalecimento da cidadania",
+  "Mais dignidade para as famílias",
+  "Melhor planejamento urbano para o município",
+];
+
+const processSteps = [
+  {
+    title: "Mobilização da comunidade",
+    text: "Audiências públicas, reuniões e contato com moradores e lideranças locais.",
+  },
+  {
+    title: "Cadastro dos moradores",
+    text: "Coleta de documentos pessoais, comprovantes, contratos, declarações e informações necessárias.",
+  },
+  {
+    title: "Levantamento técnico",
+    text: "Topografia, mapas, identificação dos lotes, delimitação do núcleo e análise da área.",
+  },
+  {
+    title: "Organização jurídica e documental",
+    text: "Análise dos documentos, cartas de anuência, memoriais e demais elementos técnicos.",
+  },
+  {
+    title: "Protocolo e acompanhamento",
+    text: "Encaminhamento pela via adequada, seja REURB ou Lar Legal, com acompanhamento junto aos órgãos competentes.",
+  },
+  {
+    title: "Cumprimento de exigências",
+    text: "Atendimento de despachos, exigências cartorárias, complementações técnicas e documentais.",
+  },
+  {
+    title: "Emissão e entrega das matrículas",
+    text: "Após aprovação dos órgãos competentes, ocorre a emissão das matrículas individualizadas.",
+  },
+];
+
+const valueItems = [
+  "Segurança jurídica",
+  "Dignidade",
+  "Transparência",
+  "Responsabilidade técnica",
+  "Compromisso social",
+  "Ética",
+  "Respeito às famílias",
+  "Parceria com municípios",
+  "Desenvolvimento urbano sustentável",
+  "Organização documental e territorial",
+];
+
+const whyChooseItems = [
+  {
+    icon: CalendarDays,
+    title: "Desde 1988",
+    text: "Criada em 16 de junho de 1988, a ADEHASC caminha rumo aos 40 anos de história.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Processo completo",
+    text: "Do cadastro à matrícula, com apoio técnico, jurídico, social, documental e topográfico.",
+  },
+  {
+    icon: Handshake,
+    title: "Parceria institucional",
+    text: "Atuação com moradores, lideranças, prefeituras, cartórios e órgãos públicos.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Transparência",
+    text: "Cada etapa é explicada de forma clara, com responsabilidade e respeito às famílias.",
+  },
+];
+
+const impactCards = [
+  { label: "Anos de atuação", value: "Desde 1988" },
+  { label: "Municípios atendidos", value: "Campo editável" },
+  { label: "Núcleos em regularização", value: "Campo editável" },
+  { label: "Matrículas entregues", value: "Campo editável" },
+  { label: "Famílias beneficiadas", value: "Campo editável" },
 ];
 
 function getStableVariant(value: string, index: number, variants: string[]) {
@@ -389,11 +503,11 @@ function SiteFooter() {
       <div className="footer-about">
         <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
         <p>
-          Desenvolver atividades para suprir a necessidade de habitação da população e
-          aproximar do lar regularizado.
+          Desde 1988, a ADEHASC atua pelo desenvolvimento habitacional sustentável,
+          pela regularização fundiária e pela segurança jurídica das famílias.
         </p>
         <strong>
-          ADEHASC – Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina
+          ADEHASC — Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina
         </strong>
         <span>CNPJ 78.486.875/0001-32</span>
       </div>
@@ -401,19 +515,16 @@ function SiteFooter() {
       <div className="footer-column footer-contact">
         <h2>Contatos</h2>
         <span>
-          <Phone size={18} /> (49) 3622-3137 – Sede Matriz
-        </span>
-        <span>
-          <Phone size={18} /> (49) 98503-1080 – Sede Matriz Dúvidas
-        </span>
-        <span>
-          <Phone size={18} /> (67) 99967-4655 – Sede Matriz - MS
+          <Phone size={18} /> (49) 3622-3137
         </span>
         <span>
           <Mail size={18} /> contato@adehasc.com.br
         </span>
         <span>
-          <MapPin size={18} /> Endereço: Avenida Salgado Filho, Nº 559, Sala 01, Centro
+          <MapPin size={18} /> Endereço institucional: confirmar antes da publicação
+        </span>
+        <span>
+          <BadgeCheck size={18} /> Presidente: Djalma Morell
         </span>
       </div>
     </footer>
@@ -425,20 +536,25 @@ function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
     <div className="about-home">
       <section className="about-hero">
         <div className="about-copy">
-          <span>Sobre nós</span>
-          <h1>Moradia regularizada, famílias mais seguras.</h1>
+          <span>Caminhando rumo aos 40 anos de história</span>
+          <h1>ADEHASC: desde 1988 transformando moradia em segurança jurídica</h1>
           <p>
-            A ADEHASC atua para aproximar a população do acesso à habitação, à informação
-            habitacional e ao lar regularizado em Santa Catarina.
+            Regularização fundiária, desenvolvimento habitacional e dignidade para
+            famílias, comunidades e municípios. Do cadastro à matrícula, a ADEHASC
+            acompanha cada etapa com responsabilidade técnica e compromisso social.
           </p>
           <div className="about-actions">
-            <button className="primary-button" onClick={onOpenNews} type="button">
-              <Newspaper size={18} />
-              Ver notícias
-            </button>
+            <a className="primary-button" href="#atuacao">
+              <Route size={18} />
+              Conheça nosso trabalho
+            </a>
             <a className="ghost-button" href="#contatos">
               <Phone size={17} />
-              Contatos
+              Fale com a ADEHASC
+            </a>
+            <a className="ghost-button" href="#regularizacao">
+              <FileText size={17} />
+              Entenda a regularização
             </a>
           </div>
         </div>
@@ -451,44 +567,257 @@ function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
           <span>CNPJ 78.486.875/0001-32</span>
           <div className="about-card-list">
             <span>
-              <MapPin size={16} />
-              Santa Catarina e atendimento regional
+              <CalendarDays size={16} />
+              Fundação: 16 de junho de 1988
             </span>
             <span>
-              <CheckCircle2 size={16} />
-              Visitantes acompanham conteúdos em modo leitura
+              <BadgeCheck size={16} />
+              Presidente: Djalma Morell
+            </span>
+            <span>
+              <Globe size={16} />
+              www.adehasc.com.br
             </span>
           </div>
         </div>
       </section>
 
-      <section className="about-info-grid" aria-label="Informações da ADEHASC">
-        {aboutHighlights.map((item) => (
-          <article key={item.title}>
-            <span>{item.title}</span>
-            <p>{item.text}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="about-details">
+      <section className="institutional-intro">
         <article>
-          <span>Como a ADEHASC ajuda</span>
-          <h2>Atendimento mais próximo, informação mais clara.</h2>
+          <span>Sobre a ADEHASC</span>
+          <h2>Transformando moradia em direito, insegurança em cidadania.</h2>
           <p>
-            O portal reúne as ações da associação em um só lugar. A população pode acompanhar
-            notícias, entregas de matrículas, projetos em andamento e registros em foto ou vídeo.
+            A ADEHASC nasceu em 16 de junho de 1988 com o compromisso de promover
+            desenvolvimento habitacional, cidadania e dignidade. Ao longo de sua
+            trajetória, consolidou sua atuação na regularização fundiária, acompanhando
+            comunidades que buscam sair da informalidade e conquistar segurança jurídica.
+          </p>
+          <p>
+            Nosso trabalho envolve muito mais do que documentos. Cada processo representa
+            famílias que desejam viver com tranquilidade, ter seu imóvel reconhecido e
+            construir um futuro com mais dignidade.
           </p>
         </article>
+        <aside className="mission-panel">
+          <div>
+            <span>Missão</span>
+            <p>
+              Promover o desenvolvimento habitacional sustentável e a regularização
+              fundiária, garantindo às famílias mais segurança jurídica, dignidade,
+              cidadania e tranquilidade para o futuro.
+            </p>
+          </div>
+          <div>
+            <span>Visão</span>
+            <p>
+              Ser referência em regularização fundiária, com responsabilidade técnica,
+              transparência, compromisso social e respeito às famílias e aos municípios.
+            </p>
+          </div>
+        </aside>
+      </section>
 
-        <ol className="about-steps">
-          {aboutSteps.map((step) => (
-            <li key={step}>
-              <CheckCircle2 size={18} />
-              <span>{step}</span>
+      <section className="section-block" id="atuacao">
+        <div className="section-heading">
+          <span>Nossa atuação</span>
+          <h2>O que a ADEHASC faz</h2>
+          <p>
+            Atuamos em processos de REURB, Programa Lar Legal e apoio técnico, jurídico,
+            social, documental e topográfico para moradores, lideranças e municípios.
+          </p>
+        </div>
+        <div className="service-grid">
+          {workAreas.map((item) => {
+            const Icon = item.icon;
+            return (
+              <article key={item.title}>
+                <Icon size={24} />
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="regularization-section" id="regularizacao">
+        <div className="section-heading">
+          <span>Regularização fundiária</span>
+          <h2>O que é Regularização Fundiária?</h2>
+          <p>
+            A regularização fundiária é o processo que transforma uma situação de
+            ocupação informal em uma situação juridicamente reconhecida. Ela organiza
+            documentos, identifica moradores, delimita lotes, analisa a área e busca
+            garantir a matrícula individualizada do imóvel.
+          </p>
+          <p>
+            Mais do que um documento, a regularização representa segurança, dignidade e
+            tranquilidade para a família.
+          </p>
+        </div>
+        <div className="benefit-grid">
+          {regularizationBenefits.map((benefit) => (
+            <span key={benefit}>
+              <CheckCircle2 size={17} />
+              {benefit}
+            </span>
+          ))}
+        </div>
+        <div className="alert-note">
+          <ShieldCheck size={22} />
+          <p>
+            A regularização fundiária não acontece do dia para a noite. É um processo
+            sério, com etapas técnicas, jurídicas, sociais, ambientais e documentais.
+            Obras como pavimentação, esgoto, água ou iluminação dependem de políticas
+            públicas, planejamento e recursos do município.
+          </p>
+        </div>
+      </section>
+
+      <section className="comparison-section">
+        <div className="section-heading">
+          <span>Caminhos para a regularização</span>
+          <h2>REURB e Lar Legal</h2>
+          <p>
+            Cada núcleo possui uma realidade. Por isso, a ADEHASC analisa o melhor
+            caminho, seja pela REURB, pelo Programa Lar Legal ou pela estratégia mais
+            segura conforme a situação jurídica, urbanística e documental da área.
+          </p>
+        </div>
+        <div className="comparison-grid">
+          <article>
+            <Landmark size={25} />
+            <h3>REURB</h3>
+            <ul>
+              <li>Procedimento administrativo.</li>
+              <li>Previsto na Lei Federal nº 13.465/2017.</li>
+              <li>Conduzido pelo Município.</li>
+              <li>Envolve aspectos jurídicos, urbanísticos, ambientais e sociais.</li>
+              <li>Quando cumpridos os requisitos, permite a emissão da matrícula.</li>
+            </ul>
+          </article>
+          <article>
+            <Scale size={25} />
+            <h3>Lar Legal</h3>
+            <ul>
+              <li>Procedimento judicial utilizado especialmente em Santa Catarina.</li>
+              <li>Conduzido com análise do Poder Judiciário.</li>
+              <li>Conta com participação do Ministério Público.</li>
+              <li>Tem como foco a titulação e a matrícula individualizada.</li>
+              <li>É alternativa importante quando a via administrativa não é a mais adequada.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <span>Como trabalhamos</span>
+          <h2>Da comunidade à matrícula</h2>
+          <p>
+            O processo exige responsabilidade, cuidado e respeito à legislação. Cada
+            avanço é importante para garantir segurança jurídica às famílias.
+          </p>
+        </div>
+        <ol className="process-list">
+          {processSteps.map((step, index) => (
+            <li key={step.title}>
+              <strong>{String(index + 1).padStart(2, "0")}</strong>
+              <div>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </div>
             </li>
           ))}
         </ol>
+      </section>
+
+      <section className="why-section">
+        <div className="section-heading">
+          <span>Por que escolher a ADEHASC?</span>
+          <h2>Regularização fundiária feita com responsabilidade</h2>
+        </div>
+        <div className="why-grid">
+          {whyChooseItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <article key={item.title}>
+                <Icon size={24} />
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="transparency-section">
+        <div>
+          <span>Transparência</span>
+          <h2>Segurança também nas condições do processo</h2>
+          <p>
+            Na ADEHASC, a transparência faz parte do processo. As famílias são
+            orientadas sobre as etapas, documentos, responsabilidades e condições de
+            pagamento. Em regra, a cobrança ocorre após a entrega da matrícula,
+            garantindo mais segurança e confiança aos moradores.
+          </p>
+        </div>
+        <HeartHandshake size={56} />
+      </section>
+
+      <section className="impact-section">
+        <div className="section-heading">
+          <span>História e impacto social</span>
+          <h2>Uma trajetória de compromisso com as famílias</h2>
+          <p>
+            Desde 1988, a ADEHASC atua na promoção do desenvolvimento habitacional e
+            da regularização fundiária, levando segurança jurídica a famílias que
+            aguardavam há anos pelo reconhecimento de seus imóveis.
+          </p>
+        </div>
+        <div className="impact-grid">
+          {impactCards.map((item) => (
+            <article key={item.label}>
+              <strong>{item.value}</strong>
+              <span>{item.label}</span>
+            </article>
+          ))}
+        </div>
+        <div className="values-wrap" aria-label="Valores da ADEHASC">
+          {valueItems.map((item) => (
+            <span key={item}>{item}</span>
+          ))}
+        </div>
+      </section>
+
+      <section className="stories-section">
+        <div className="section-heading">
+          <span>Notícias e histórias</span>
+          <h2>Entregas e atuações podem virar cases no portal</h2>
+          <p>
+            A equipe poderá inserir relatos, fotos, vídeos e matérias sobre entregas
+            de matrículas, audiências públicas, mobilizações e avanços de cada núcleo.
+          </p>
+        </div>
+        <button className="ghost-button" onClick={onOpenNews} type="button">
+          <Newspaper size={18} />
+          Ver notícias publicadas
+        </button>
+      </section>
+
+      <section className="final-cta">
+        <div>
+          <span>Fale com a ADEHASC</span>
+          <h2>Quer regularizar sua comunidade ou município?</h2>
+          <p>
+            A ADEHASC pode auxiliar na construção do caminho mais seguro para a
+            regularização fundiária, com responsabilidade, transparência e compromisso social.
+          </p>
+        </div>
+        <a className="primary-button" href="#contatos">
+          Fale com a ADEHASC
+          <ArrowRight size={18} />
+        </a>
       </section>
     </div>
   );
