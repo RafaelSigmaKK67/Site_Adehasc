@@ -10,6 +10,16 @@ const maxUploadBytes = 250 * 1024 * 1024;
 export const uploadGuidance =
   "Upload direto usa Vercel Blob e aceita fotos e vídeos grandes. Para vídeos muito pesados, YouTube, Vimeo ou Drive continuam sendo boas opções.";
 
+async function ensureMediaUploadsReady(adminPassword: string): Promise<void> {
+  const response = await fetch("/api/media", {
+    headers: {
+      "x-admin-password": adminPassword,
+    },
+  });
+
+  await readResponse<{ ok: true }>(response);
+}
+
 async function readResponse<T>(response: Response): Promise<T> {
   const contentType = response.headers.get("content-type") || "";
   const data = contentType.includes("application/json")
@@ -115,9 +125,11 @@ export async function uploadMedia(file: File, adminPassword: string): Promise<Me
     );
   }
 
+  await ensureMediaUploadsReady(adminPassword);
+
   const fileName = safeFileName(file.name) || "midia";
   const blob = await uploadBlob(`media/${Date.now()}-${crypto.randomUUID()}-${fileName}`, file, {
-    access: "public",
+    access: "private",
     contentType: contentTypeFor(file),
     handleUploadUrl: "/api/media",
     headers: {
@@ -129,7 +141,7 @@ export async function uploadMedia(file: File, adminPassword: string): Promise<Me
   return {
     id: crypto.randomUUID(),
     type: isVideo ? "video" : "image",
-    src: blob.url,
+    src: `/api/media-file?path=${encodeURIComponent(blob.pathname)}`,
     name: file.name,
   };
 }

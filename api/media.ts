@@ -80,6 +80,23 @@ function sendError(res: ApiResponse, error: unknown) {
 }
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
+  if (req.method === "GET") {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      sendJson(res, 503, {
+        error:
+          "BLOB_READ_WRITE_TOKEN ainda não foi configurada no Vercel. Conecte um Blob Store ao projeto para enviar mídias.",
+      });
+      return;
+    }
+
+    if (!authorizeAdmin(req, res)) {
+      return;
+    }
+
+    sendJson(res, 200, { ok: true });
+    return;
+  }
+
   if (req.method !== "POST") {
     sendJson(res, 405, { error: "Método não permitido." });
     return;
