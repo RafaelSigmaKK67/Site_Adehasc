@@ -35,6 +35,14 @@
     {
       "source": "/materias/:path*",
       "destination": "/index.html"
+    },
+    {
+      "source": "/contato",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/contato/:path*",
+      "destination": "/index.html"
     }
   ]
 }

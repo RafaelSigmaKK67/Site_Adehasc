@@ -20,6 +20,7 @@ import {
   Mail,
   Map,
   MapPin,
+  MessageCircle,
   Newspaper,
   Phone,
   Pencil,
@@ -50,6 +51,13 @@ import type { MediaItem, Post, PostInput } from "./types";
 const categories = ["Todas", "Institucional", "Notícias", "Projetos", "Eventos"];
 const mediaFilters = ["Tudo", "Fotos", "Vídeos"];
 const logoSrcSet = "/adehasc-logo.png 1x, /adehasc-logo@2x.png 2x";
+const contactEmail = "contato@adehasc.com.br";
+const contactPhoneDisplay = "(49) 3622-3137";
+const contactPhoneHref = "tel:+554936223137";
+// Confirmar com a equipe ADEHASC se este telefone também é o WhatsApp oficial.
+const contactWhatsAppHref =
+  "https://wa.me/554936223137?text=Ol%C3%A1%2C%20gostaria%20de%20atendimento%20sobre%20regulariza%C3%A7%C3%A3o%20fundi%C3%A1ria.";
+type PublicSection = "about" | "news" | "contact";
 
 function createBlankPost(): PostInput {
   return {
@@ -226,15 +234,25 @@ function normalizeVideoInput(input: string) {
 function getPublicRoute() {
   const path = window.location.pathname.toLowerCase();
   const segments = path.split("/").filter(Boolean);
+  const section: PublicSection = path.startsWith("/noticias") || path.startsWith("/materias")
+    ? "news"
+    : path.startsWith("/contato")
+      ? "contact"
+      : "about";
 
   return {
-    section: path.startsWith("/noticias") || path.startsWith("/materias") ? "news" : "about",
-    selectedId: segments[1] || "",
+    section,
+    selectedId: section === "news" ? segments[1] || "" : "",
   } as const;
 }
 
-function setPublicRoute(section: "about" | "news", postId = "") {
-  const path = section === "news" ? `/noticias${postId ? `/${encodeURIComponent(postId)}` : ""}` : "/";
+function setPublicRoute(section: PublicSection, postId = "") {
+  const path =
+    section === "news"
+      ? `/noticias${postId ? `/${encodeURIComponent(postId)}` : ""}`
+      : section === "contact"
+        ? "/contato"
+        : "/";
 
   if (window.location.pathname !== path) {
     window.history.pushState({}, "", path);
@@ -315,7 +333,12 @@ function MediaViewer({
     return (
       <figure className={`media-card compact-media-card ${layoutClass}`}>
         <button className="media-open" onClick={() => onOpen(item)} type="button">
-          <img src={item.src} alt={item.caption || item.name} onError={handleImageError} />
+          <img
+            src={item.src}
+            alt={item.caption || item.name}
+            loading="lazy"
+            onError={handleImageError}
+          />
           <span>Expandir</span>
         </button>
         {item.caption ? <figcaption>{item.caption}</figcaption> : null}
@@ -514,12 +537,15 @@ function SiteFooter() {
 
       <div className="footer-column footer-contact">
         <h2>Contatos</h2>
-        <span>
-          <Phone size={18} /> (49) 3622-3137
-        </span>
-        <span>
-          <Mail size={18} /> contato@adehasc.com.br
-        </span>
+        <a href={contactPhoneHref}>
+          <Phone size={18} /> {contactPhoneDisplay}
+        </a>
+        <a href={`mailto:${contactEmail}`}>
+          <Mail size={18} /> {contactEmail}
+        </a>
+        <a href={contactWhatsAppHref} target="_blank" rel="noreferrer">
+          <MessageCircle size={18} /> WhatsApp
+        </a>
         <span>
           <MapPin size={18} /> Endereço institucional: confirmar antes da publicação
         </span>
@@ -531,7 +557,13 @@ function SiteFooter() {
   );
 }
 
-function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
+function AboutHome({
+  onOpenContact,
+  onOpenNews,
+}: {
+  onOpenContact: () => void;
+  onOpenNews: () => void;
+}) {
   return (
     <div className="about-home">
       <section className="about-hero">
@@ -548,10 +580,10 @@ function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
               <Route size={18} />
               Conheça nosso trabalho
             </a>
-            <a className="ghost-button" href="#contatos">
+            <button className="ghost-button" onClick={onOpenContact} type="button">
               <Phone size={17} />
               Fale com a ADEHASC
-            </a>
+            </button>
             <a className="ghost-button" href="#regularizacao">
               <FileText size={17} />
               Entenda a regularização
@@ -814,12 +846,67 @@ function AboutHome({ onOpenNews }: { onOpenNews: () => void }) {
             regularização fundiária, com responsabilidade, transparência e compromisso social.
           </p>
         </div>
-        <a className="primary-button" href="#contatos">
+        <button className="primary-button" onClick={onOpenContact} type="button">
           Fale com a ADEHASC
           <ArrowRight size={18} />
-        </a>
+        </button>
       </section>
     </div>
+  );
+}
+
+function ContactPage() {
+  return (
+    <section className="contact-page">
+      <div className="contact-hero">
+        <span>Atendimento</span>
+        <h1>Fale com a ADEHASC</h1>
+        <p>
+          Entre em contato com a nossa equipe para tirar dúvidas sobre regularização
+          fundiária, REURB, Programa Lar Legal, andamento de processos ou atendimento
+          aos moradores.
+        </p>
+      </div>
+
+      <div className="contact-grid" aria-label="Opções de contato">
+        <article className="contact-card">
+          <Mail size={28} />
+          <h2>Enviar e-mail</h2>
+          <p>Envie sua dúvida ou solicitação para nossa equipe.</p>
+          <a className="primary-button" href={`mailto:${contactEmail}`}>
+            Enviar e-mail
+            <ArrowRight size={18} />
+          </a>
+        </article>
+
+        <article className="contact-card">
+          <Phone size={28} />
+          <h2>Ligar para a ADEHASC</h2>
+          <p>Fale diretamente com nossa equipe pelo telefone oficial.</p>
+          <a className="primary-button" href={contactPhoneHref}>
+            Ligar agora
+            <ArrowRight size={18} />
+          </a>
+        </article>
+
+        <article className="contact-card">
+          <MessageCircle size={28} />
+          <h2>WhatsApp</h2>
+          <p>Envie uma mensagem pelo WhatsApp para atendimento.</p>
+          <a className="primary-button" href={contactWhatsAppHref} target="_blank" rel="noreferrer">
+            Chamar no WhatsApp
+            <ArrowRight size={18} />
+          </a>
+        </article>
+      </div>
+
+      <aside className="contact-note">
+        <strong>ADEHASC — Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina</strong>
+        <span>CNPJ 78.486.875/0001-32</span>
+        <span>Presidente: Djalma Morell</span>
+        <span>Endereço institucional: confirmar antes da publicação</span>
+      </aside>
+    </section>
   );
 }
 
@@ -842,16 +929,19 @@ function NewsCard({
     >
       <div className="news-card-cover">
         {post.cover ? (
-          <img src={post.cover} alt="" onError={handleImageError} />
+          <img src={post.cover} alt="" loading="lazy" onError={handleImageError} />
         ) : (
-          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="" />
+          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="" loading="lazy" />
         )}
       </div>
       <div className="news-card-body">
         <span>{post.category}</span>
         <strong>{post.title || "Matéria sem título"}</strong>
         <p>{post.excerpt}</p>
-        <small>{formatDate(post.updatedAt)}</small>
+        <div className="news-card-meta">
+          <small>{formatDate(post.updatedAt)}</small>
+          <em>Ler matéria</em>
+        </div>
       </div>
     </button>
   );
@@ -869,7 +959,7 @@ function PublicPortal({
   onRefresh: () => void;
 }) {
   const initialRoute = getPublicRoute();
-  const [section, setSection] = useState<"about" | "news">(initialRoute.section);
+  const [section, setSection] = useState<PublicSection>(initialRoute.section);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
   const [mediaFilter, setMediaFilter] = useState("Tudo");
@@ -939,10 +1029,29 @@ function PublicPortal({
     setPublicRoute("news");
   }
 
+  function openContact() {
+    setSection("contact");
+    setSelectedId("");
+    setIsMenuOpen(false);
+    setPublicRoute("contact");
+  }
+
   function selectNews(post: Post) {
     setSelectedId(post.id);
     setPublicRoute("news", post.id);
   }
+
+  const pageTitle = {
+    about: "Sobre nós",
+    news: "Notícias",
+    contact: "Contato",
+  }[section];
+
+  const pageSubtitle = {
+    about: "Conheça a ADEHASC",
+    news: "Matérias publicadas",
+    contact: "Canais de atendimento",
+  }[section];
 
   return (
     <main className="public-page">
@@ -952,13 +1061,13 @@ function PublicPortal({
             className="icon-button menu-button"
             onClick={() => setIsMenuOpen((current) => !current)}
             type="button"
-            title="Abrir filtros"
+            title="Abrir menu"
           >
             <Ellipsis size={21} />
           </button>
           <div className="public-window-title">
-            <span>{section === "about" ? "Sobre nós" : "Notícias"}</span>
-            <strong>{section === "about" ? "Conheça a ADEHASC" : "Matérias publicadas"}</strong>
+            <span>{pageTitle}</span>
+            <strong>{pageSubtitle}</strong>
           </div>
           <div className="public-window-actions">
             <div className="public-tabs" role="tablist" aria-label="Navegação pública">
@@ -980,6 +1089,15 @@ function PublicPortal({
               >
                 Notícias
               </button>
+              <button
+                aria-selected={section === "contact"}
+                className={section === "contact" ? "active" : ""}
+                onClick={openContact}
+                role="tab"
+                type="button"
+              >
+                Contato
+              </button>
             </div>
             {section === "news" ? (
               <button className="icon-button" onClick={onRefresh} type="button" title="Atualizar">
@@ -995,7 +1113,7 @@ function PublicPortal({
               className="settings-scrim"
               onClick={() => setIsMenuOpen(false)}
               type="button"
-              aria-label="Fechar filtros"
+              aria-label="Fechar menu"
             />
             <aside className="settings-panel">
               <div>
@@ -1018,6 +1136,14 @@ function PublicPortal({
                 >
                   <Newspaper size={18} />
                   <span>Notícias</span>
+                </button>
+                <button
+                  className={section === "contact" ? "active" : ""}
+                  onClick={openContact}
+                  type="button"
+                >
+                  <Phone size={18} />
+                  <span>Contato</span>
                 </button>
               </nav>
               {section === "news" ? (
@@ -1069,7 +1195,9 @@ function PublicPortal({
         ) : null}
 
         {section === "about" ? (
-          <AboutHome onOpenNews={openNews} />
+          <AboutHome onOpenContact={openContact} onOpenNews={openNews} />
+        ) : section === "contact" ? (
+          <ContactPage />
         ) : (
           <section className="news-section">
             <div className="command-bar public-command-bar">
@@ -1106,6 +1234,12 @@ function PublicPortal({
 
             {selectedPost ? (
               <article className="reader-pane news-detail">
+                <div className="article-head">
+                  <span>{selectedPost.category}</span>
+                  <h1>{selectedPost.title}</h1>
+                  <p>{selectedPost.excerpt}</p>
+                  <small>Atualizado em {formatDate(selectedPost.updatedAt)}</small>
+                </div>
                 <button
                   className="cover-frame expanded-cover"
                   onClick={() =>
@@ -1121,16 +1255,11 @@ function PublicPortal({
                   <img
                     src={selectedPost.cover || "/adehasc-logo.png"}
                     alt=""
+                    loading="lazy"
                     onError={handleImageError}
                   />
                   <span>Ampliar capa</span>
                 </button>
-                <div className="article-head">
-                  <span>{selectedPost.category}</span>
-                  <h1>{selectedPost.title}</h1>
-                  <p>{selectedPost.excerpt}</p>
-                  <small>Atualizado em {formatDate(selectedPost.updatedAt)}</small>
-                </div>
                 <div className="article-body">
                   {splitParagraphs(selectedPost.body).map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
