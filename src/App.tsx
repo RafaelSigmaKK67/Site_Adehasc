@@ -51,7 +51,7 @@ import type { MediaItem, Post, PostInput } from "./types";
 const categories = ["Todas", "Institucional", "Notícias", "Projetos", "Eventos"];
 const mediaFilters = ["Tudo", "Fotos", "Vídeos"];
 const logoSrcSet = "/adehasc-logo.png 1x, /adehasc-logo@2x.png 2x";
-const contactEmail = "contato@adehasc.com.br";
+const contactEmail = "admadehasc@gmail.com";
 const contactPhoneDisplay = "(49) 3622-3137";
 const contactPhoneHref = "tel:+554936223137";
 // Confirmar com a equipe ADEHASC se este telefone também é o WhatsApp oficial.
@@ -231,6 +231,127 @@ function normalizeVideoInput(input: string) {
   return isEmbeddedVideo(normalized) || isDirectVideoUrl(normalized) ? normalized : "";
 }
 
+type PostVisual =
+  | { kind: "image"; src: string; videoSrc?: string }
+  | { kind: "video"; src: string; poster?: string }
+  | { kind: "videoFallback"; src: string };
+
+function getVideoThumbnail(src: string) {
+  const url = getNormalizedUrl(src);
+
+  if (!url) {
+    return "";
+  }
+
+  const host = url.hostname.replace(/^www\./, "").replace(/^m\./, "");
+
+  if (host.includes("youtube.com") || host.includes("youtube-nocookie.com") || host.includes("youtu.be")) {
+    const id = getYouTubeId(url);
+    return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : "";
+  }
+
+  return "";
+}
+
+function getVisualFromSource(src: string, videoSrc = ""): PostVisual {
+  if (isDirectVideoUrl(src)) {
+    return { kind: "video", src, poster: getVideoThumbnail(src) || undefined };
+  }
+
+  if (isEmbeddedVideo(src)) {
+    const thumbnail = getVideoThumbnail(src);
+    return thumbnail ? { kind: "image", src: thumbnail, videoSrc: videoSrc || src } : { kind: "videoFallback", src };
+  }
+
+  return { kind: "image", src, videoSrc };
+}
+
+function getPostVisual(post: Post): PostVisual {
+  const cover = post.cover?.trim();
+
+  if (cover) {
+    return getVisualFromSource(cover);
+  }
+
+  const firstImage = post.media.find((item) => item.type === "image");
+
+  if (firstImage) {
+    return { kind: "image", src: firstImage.src };
+  }
+
+  const firstVideo = post.media.find((item) => item.type === "video");
+
+  if (firstVideo) {
+    return getVisualFromSource(firstVideo.src);
+  }
+
+  return { kind: "image", src: "/adehasc-logo.png" };
+}
+
+function createCoverLightboxItem(post: Post, visual: PostVisual): MediaItem {
+  const isVideo = visual.kind === "video" || visual.kind === "videoFallback" || Boolean(visual.kind === "image" && visual.videoSrc);
+
+  return {
+    id: `${post.id}-cover`,
+    type: isVideo ? "video" : "image",
+    src: visual.kind === "image" ? visual.videoSrc || visual.src : visual.src,
+    name: post.title,
+  };
+}
+
+function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "card" | "detail" }) {
+  const isDetail = variant === "detail";
+
+  if (visual.kind === "image") {
+    return (
+      <>
+        <img
+          className={visual.videoSrc ? "video-thumbnail-image" : ""}
+          src={visual.src}
+          srcSet={visual.src === "/adehasc-logo.png" ? logoSrcSet : undefined}
+          alt=""
+          loading="lazy"
+          onError={handleImageError}
+        />
+        {visual.videoSrc && !isDetail ? (
+          <span className="video-badge">
+            <Video size={isDetail ? 18 : 15} />
+            Vídeo
+          </span>
+        ) : null}
+      </>
+    );
+  }
+
+  if (visual.kind === "video") {
+    return (
+      <>
+        <video
+          src={visual.src}
+          poster={visual.poster}
+          controls={isDetail}
+          muted={!isDetail}
+          playsInline
+          preload="metadata"
+        />
+        {!isDetail ? (
+          <span className="video-badge">
+            <Video size={15} />
+            Vídeo
+          </span>
+        ) : null}
+      </>
+    );
+  }
+
+  return (
+    <div className="video-fallback-visual">
+      <Video size={isDetail ? 44 : 32} />
+      <span>Vídeo</span>
+    </div>
+  );
+}
+
 function getPublicRoute() {
   const path = window.location.pathname.toLowerCase();
   const segments = path.split("/").filter(Boolean);
@@ -312,7 +433,7 @@ function MediaLightbox({
             allowFullScreen
           />
         ) : (
-          <video src={item.src} controls autoPlay />
+          <video src={item.src} poster={getVideoThumbnail(item.src) || undefined} controls autoPlay />
         )}
         {item.caption ? <p>{item.caption}</p> : null}
       </div>
@@ -357,7 +478,7 @@ function MediaViewer({
         </button>
       ) : (
         <button className="media-open" onClick={() => onOpen(item)} type="button">
-          <video src={item.src} muted />
+          <video src={item.src} poster={getVideoThumbnail(item.src) || undefined} muted preload="metadata" playsInline />
           <span>Expandir</span>
         </button>
       )}
@@ -380,7 +501,17 @@ function VideoPreview({ item }: { item: MediaItem }) {
     );
   }
 
-  return <video className="video-thumb-frame" src={item.src} controls muted />;
+  return (
+    <video
+      className="video-thumb-frame"
+      src={item.src}
+      poster={getVideoThumbnail(item.src) || undefined}
+      controls
+      muted
+      preload="metadata"
+      playsInline
+    />
+  );
 }
 
 const mosaicClasses = [
@@ -921,6 +1052,8 @@ function NewsCard({
   isSelected: boolean;
   onClick: () => void;
 }) {
+  const visual = getPostVisual(post);
+
   return (
     <button
       className={`news-card ${layoutClass} ${isSelected ? "selected" : ""}`}
@@ -928,11 +1061,7 @@ function NewsCard({
       type="button"
     >
       <div className="news-card-cover">
-        {post.cover ? (
-          <img src={post.cover} alt="" loading="lazy" onError={handleImageError} />
-        ) : (
-          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="" loading="lazy" />
-        )}
+        <PostVisualFrame visual={visual} variant="card" />
       </div>
       <div className="news-card-body">
         <span>{post.category}</span>
@@ -996,6 +1125,9 @@ function PublicPortal({
   const selectedPost = selectedId
     ? filteredPosts.find((post) => post.id === selectedId) || null
     : null;
+  const selectedVisual = selectedPost ? getPostVisual(selectedPost) : null;
+  const selectedCoverItem =
+    selectedPost && selectedVisual ? createCoverLightboxItem(selectedPost, selectedVisual) : null;
 
   useEffect(() => {
     if (!isLoading && selectedId && !filteredPosts.some((post) => post.id === selectedId)) {
@@ -1240,26 +1372,26 @@ function PublicPortal({
                   <p>{selectedPost.excerpt}</p>
                   <small>Atualizado em {formatDate(selectedPost.updatedAt)}</small>
                 </div>
-                <button
-                  className="cover-frame expanded-cover"
-                  onClick={() =>
-                    setExpandedMedia({
-                      id: `${selectedPost.id}-cover`,
-                      type: "image",
-                      src: selectedPost.cover || "/adehasc-logo.png",
-                      name: selectedPost.title,
-                    })
-                  }
-                  type="button"
-                >
-                  <img
-                    src={selectedPost.cover || "/adehasc-logo.png"}
-                    alt=""
-                    loading="lazy"
-                    onError={handleImageError}
-                  />
-                  <span>Ampliar capa</span>
-                </button>
+                {selectedVisual?.kind === "video" ? (
+                  <div className="cover-frame expanded-cover article-cover-frame">
+                    <PostVisualFrame visual={selectedVisual} variant="detail" />
+                  </div>
+                ) : selectedVisual ? (
+                  <button
+                    className="cover-frame expanded-cover article-cover-frame"
+                    onClick={() => {
+                      if (selectedCoverItem) {
+                        setExpandedMedia(selectedCoverItem);
+                      }
+                    }}
+                    type="button"
+                  >
+                    <PostVisualFrame visual={selectedVisual} variant="detail" />
+                    <span className="cover-action-label">
+                      {selectedCoverItem?.type === "video" ? "Abrir vídeo" : "Ampliar capa"}
+                    </span>
+                  </button>
+                ) : null}
                 <div className="article-body">
                   {splitParagraphs(selectedPost.body).map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>

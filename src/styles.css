@@ -1187,6 +1187,7 @@ iframe {
 }
 
 .news-card-cover {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
@@ -1196,15 +1197,44 @@ iframe {
   overflow: hidden;
 }
 
-.news-card-cover img {
+.news-card-cover img,
+.news-card-cover video {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #ffffff;
 }
 
 .news-card-cover img[src="/adehasc-logo.png"] {
-  object-fit: contain;
   padding: 18px;
+}
+
+.video-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(18, 20, 23, 0.74);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.video-fallback-visual {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  min-height: 150px;
+  color: var(--ade-green);
+  background: #ffffff;
+  font-weight: 800;
 }
 
 .news-card-body {
@@ -1274,14 +1304,17 @@ iframe {
 
 .expanded-cover {
   position: relative;
-  display: block;
+  display: grid;
+  place-items: center;
+  justify-self: center;
   width: min(100%, 900px);
-  height: clamp(180px, 28vw, 320px);
+  height: clamp(190px, 34vw, 480px);
+  max-height: 480px;
   padding: 0;
   cursor: zoom-in;
 }
 
-.expanded-cover span {
+.expanded-cover > .cover-action-label {
   position: absolute;
   right: 14px;
   bottom: 14px;
@@ -1291,6 +1324,14 @@ iframe {
   background: rgba(18, 20, 23, 0.72);
   font-size: 0.82rem;
   font-weight: 800;
+}
+
+.article-cover-frame {
+  margin: 0 auto;
+}
+
+div.article-cover-frame {
+  cursor: default;
 }
 
 .news-detail .article-head,
@@ -1404,12 +1445,19 @@ iframe {
 }
 
 .thumb img,
-.cover-frame img,
 .media-card img,
 .media-editor-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.cover-frame img,
+.cover-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #ffffff;
 }
 
 .reader-pane {
@@ -1600,6 +1648,11 @@ iframe {
   aspect-ratio: 16 / 10;
   border: 0;
   object-fit: cover;
+}
+
+.media-card video {
+  object-fit: contain;
+  background: #ffffff;
 }
 
 .compact-media-card img,
@@ -1998,7 +2051,7 @@ iframe {
   border: 0;
   border-radius: 6px;
   background: #f0f3f5;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .video-thumb {
