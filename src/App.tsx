@@ -1789,6 +1789,16 @@ function AdminEditor({
               />
             </label>
 
+            <div className="cover-guidance" role="note">
+              <strong>Imagem recomendada para capa: 1200 x 675 px, proporção 16:9.</strong>
+              <p>Use imagens nessa proporção para evitar cortes na capa da postagem.</p>
+              <p>
+                Imagens verticais, quadradas, logos ou artes com texto serão ajustadas
+                automaticamente para aparecerem inteiras, mas podem ficar com margens laterais
+                ou superior/inferior.
+              </p>
+            </div>
+
             <div className="upload-line">
               <label className="upload-button">
                 <UploadCloud size={18} />
@@ -1871,8 +1881,9 @@ function AdminEditor({
 
           <aside className="preview-pane">
             <span>Prévia</span>
-            <div className="cover-frame small">
+            <div className="admin-image-preview-wrapper">
               <img
+                className="admin-image-preview"
                 src={editing.cover || "/adehasc-logo.png"}
                 alt=""
                 onError={handleImageError}
