@@ -303,10 +303,18 @@ function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "ca
   const isDetail = variant === "detail";
 
   if (visual.kind === "image") {
+    const imageClassName = [
+      "post-visual-image",
+      isDetail ? "article-cover post-cover news-detail-image" : "post-card-image news-card-image",
+      visual.videoSrc ? "video-thumbnail-image" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     return (
       <>
         <img
-          className={visual.videoSrc ? "video-thumbnail-image" : ""}
+          className={imageClassName}
           src={visual.src}
           srcSet={visual.src === "/adehasc-logo.png" ? logoSrcSet : undefined}
           alt=""
@@ -327,6 +335,7 @@ function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "ca
     return (
       <>
         <video
+          className={`post-visual-video ${isDetail ? "article-cover post-cover news-detail-image" : "post-card-image news-card-image"}`}
           src={visual.src}
           poster={visual.poster}
           controls={isDetail}
@@ -345,7 +354,7 @@ function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "ca
   }
 
   return (
-    <div className="video-fallback-visual">
+    <div className="video-fallback-visual post-visual-fallback">
       <Video size={isDetail ? 44 : 32} />
       <span>Vídeo</span>
     </div>
@@ -1060,7 +1069,7 @@ function NewsCard({
       onClick={onClick}
       type="button"
     >
-      <div className="news-card-cover">
+      <div className="news-card-cover news-card-image-wrapper post-card-image-wrapper post-visual-wrapper">
         <PostVisualFrame visual={visual} variant="card" />
       </div>
       <div className="news-card-body">
@@ -1373,12 +1382,12 @@ function PublicPortal({
                   <small>Atualizado em {formatDate(selectedPost.updatedAt)}</small>
                 </div>
                 {selectedVisual?.kind === "video" ? (
-                  <div className="cover-frame expanded-cover article-cover-frame">
+                  <div className="cover-frame expanded-cover article-cover-frame article-cover-image-wrapper post-cover-image-wrapper post-visual-wrapper">
                     <PostVisualFrame visual={selectedVisual} variant="detail" />
                   </div>
                 ) : selectedVisual ? (
                   <button
-                    className="cover-frame expanded-cover article-cover-frame"
+                    className="cover-frame expanded-cover article-cover-frame article-cover-image-wrapper post-cover-image-wrapper post-visual-wrapper"
                     onClick={() => {
                       if (selectedCoverItem) {
                         setExpandedMedia(selectedCoverItem);
