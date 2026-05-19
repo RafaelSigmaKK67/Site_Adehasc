@@ -7,6 +7,8 @@ import {
   CheckCircle2,
   ClipboardList,
   Ellipsis,
+  Eye,
+  EyeOff,
   FileCheck2,
   FileText,
   Globe,
@@ -37,7 +39,7 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { FormEvent, SyntheticEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, type SyntheticEvent, useEffect, useMemo, useState } from "react";
 import {
   deletePost,
   fetchPosts,
@@ -57,6 +59,11 @@ const contactPhoneHref = "tel:+554936223137";
 // Confirmar com a equipe ADEHASC se este telefone também é o WhatsApp oficial.
 const contactWhatsAppHref =
   "https://wa.me/554936223137?text=Ol%C3%A1%2C%20gostaria%20de%20atendimento%20sobre%20regulariza%C3%A7%C3%A3o%20fundi%C3%A1ria.";
+const matrixLabel = "MATRIZ";
+const matrixAddress = "Av. Salgado Filho, 559 - Centro, São Miguel do Oeste - SC, 89900-000";
+const matrixMapsHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  "Av. Salgado Filho, 559 - Centro, São Miguel do Oeste, Santa Catarina",
+)}`;
 type PublicSection = "about" | "news" | "contact";
 
 function createBlankPost(): PostInput {
@@ -299,6 +306,45 @@ function createCoverLightboxItem(post: Post, visual: PostVisual): MediaItem {
   };
 }
 
+function PostImageFrame({
+  alt,
+  children,
+  className = "",
+  imageClassName = "",
+  src,
+}: {
+  alt: string;
+  children?: ReactNode;
+  className?: string;
+  imageClassName?: string;
+  src: string;
+}) {
+  const frameClassName = ["post-image-frame", className].filter(Boolean).join(" ");
+  const mainClassName = ["post-image-main", imageClassName].filter(Boolean).join(" ");
+
+  return (
+    <div className={frameClassName}>
+      <img
+        aria-hidden="true"
+        alt=""
+        className="post-image-bg"
+        loading="lazy"
+        onError={handleImageError}
+        src={src}
+      />
+      <img
+        alt={alt}
+        className={mainClassName}
+        loading="lazy"
+        onError={handleImageError}
+        src={src}
+        srcSet={src === "/adehasc-logo.png" ? logoSrcSet : undefined}
+      />
+      {children}
+    </div>
+  );
+}
+
 function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "card" | "detail" }) {
   const isDetail = variant === "detail";
 
@@ -312,22 +358,19 @@ function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "ca
       .join(" ");
 
     return (
-      <>
-        <img
-          className={imageClassName}
-          src={visual.src}
-          srcSet={visual.src === "/adehasc-logo.png" ? logoSrcSet : undefined}
-          alt=""
-          loading="lazy"
-          onError={handleImageError}
-        />
+      <PostImageFrame
+        alt=""
+        className={isDetail ? "post-image-frame-detail" : "post-image-frame-card"}
+        imageClassName={imageClassName}
+        src={visual.src}
+      >
         {visual.videoSrc && !isDetail ? (
           <span className="video-badge">
             <Video size={isDetail ? 18 : 15} />
             Vídeo
           </span>
         ) : null}
-      </>
+      </PostImageFrame>
     );
   }
 
@@ -686,9 +729,12 @@ function SiteFooter() {
         <a href={contactWhatsAppHref} target="_blank" rel="noreferrer">
           <MessageCircle size={18} /> WhatsApp
         </a>
-        <span>
-          <MapPin size={18} /> Endereço institucional: confirmar antes da publicação
-        </span>
+        <a href={matrixMapsHref} target="_blank" rel="noreferrer">
+          <MapPin size={18} />
+          <span>
+            <strong>{matrixLabel}</strong>: {matrixAddress}
+          </span>
+        </a>
         <span>
           <BadgeCheck size={18} /> Presidente: Djalma Morell
         </span>
@@ -1044,7 +1090,12 @@ function ContactPage() {
         <strong>ADEHASC — Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina</strong>
         <span>CNPJ 78.486.875/0001-32</span>
         <span>Presidente: Djalma Morell</span>
-        <span>Endereço institucional: confirmar antes da publicação</span>
+        <a className="contact-location" href={matrixMapsHref} target="_blank" rel="noreferrer">
+          <MapPin size={18} />
+          <span>
+            <strong>{matrixLabel}</strong>: {matrixAddress}
+          </span>
+        </a>
       </aside>
     </section>
   );
@@ -1454,6 +1505,7 @@ function AdminLogin({
   onLogin: (password: string) => void;
 }) {
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -1467,14 +1519,23 @@ function AdminLogin({
         <form onSubmit={handleSubmit}>
           <label>
             <span>Senha ADM</span>
-            <div className="input-with-icon">
+            <div className="input-with-icon password-field">
               <Lock size={18} />
               <input
                 autoComplete="current-password"
                 onChange={(event) => setPassword(event.target.value)}
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
               />
+              <button
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                aria-pressed={showPassword}
+                className="password-toggle"
+                onClick={() => setShowPassword((current) => !current)}
+                type="button"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </label>
           {error ? <p className="form-error">{error}</p> : null}
@@ -1882,11 +1943,11 @@ function AdminEditor({
           <aside className="preview-pane">
             <span>Prévia</span>
             <div className="admin-image-preview-wrapper">
-              <img
-                className="admin-image-preview"
-                src={editing.cover || "/adehasc-logo.png"}
+              <PostImageFrame
                 alt=""
-                onError={handleImageError}
+                className="admin-image-preview-frame"
+                imageClassName="admin-image-preview"
+                src={editing.cover || "/adehasc-logo.png"}
               />
             </div>
             <h2>{editing.title || "Título da matéria"}</h2>
