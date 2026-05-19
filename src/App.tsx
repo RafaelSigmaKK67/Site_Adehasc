@@ -646,10 +646,10 @@ const whyChooseItems = [
 
 const impactCards = [
   { label: "Anos de atuação", value: "Desde 1988" },
-  { label: "Municípios atendidos", value: "Campo editável" },
-  { label: "Núcleos em regularização", value: "Campo editável" },
-  { label: "Matrículas entregues", value: "Campo editável" },
-  { label: "Famílias beneficiadas", value: "Campo editável" },
+  { label: "Municípios atendidos", value: "215" },
+  { label: "Núcleos em regularização", value: "1.584" },
+  { label: "Matrículas emitidas", value: "Mais de 40.000" },
+  { label: "Famílias beneficiadas", value: "Mais de 50.000" },
 ];
 
 function getStableVariant(value: string, index: number, variants: string[]) {
