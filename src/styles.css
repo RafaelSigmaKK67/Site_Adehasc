@@ -18,6 +18,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -194,7 +198,8 @@ iframe {
 .public-page {
   width: 100%;
   background: #ffffff;
-  overflow-x: hidden;
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .public-window {
@@ -208,17 +213,26 @@ iframe {
 }
 
 .public-window-bar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   min-height: 58px;
   padding-inline: clamp(14px, 3vw, 42px);
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
 }
 
 .public-window-brand {
   display: inline-flex;
   align-items: center;
   min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
 }
 
 .public-window-brand img {
@@ -226,6 +240,19 @@ iframe {
   height: 39px;
   object-fit: contain;
   image-rendering: auto;
+}
+
+.public-window-brand:focus-visible,
+.footer-logo-button:focus-visible {
+  border-radius: var(--radius);
+  outline: 3px solid rgba(36, 143, 74, 0.18);
+  outline-offset: 4px;
+}
+
+.top-anchor {
+  width: 100%;
+  height: 0;
+  scroll-margin-top: 72px;
 }
 
 .menu-button {
@@ -435,6 +462,10 @@ iframe {
   overflow: hidden;
 }
 
+.feed-window.public-window {
+  overflow: visible;
+}
+
 .window-bar {
   display: flex;
   align-items: center;
@@ -446,9 +477,14 @@ iframe {
 }
 
 .window-bar.public-window-bar {
+  position: sticky;
+  top: 0;
+  z-index: 25;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
 }
 
 .window-bar span,
@@ -2010,10 +2046,30 @@ div.article-cover-frame {
   gap: 14px;
 }
 
-.footer-about img {
+.footer-logo-button {
+  justify-self: start;
+  width: max-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.footer-about img,
+.footer-logo-button img {
   width: 220px;
   height: auto;
   image-rendering: auto;
+}
+
+.footer-logo-button:hover img {
+  transform: translateY(-1px);
+}
+
+.footer-logo-button img {
+  display: block;
+  transition: transform 0.16s ease;
 }
 
 .footer-about p {

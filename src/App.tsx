@@ -432,6 +432,26 @@ function setPublicRoute(section: PublicSection, postId = "") {
   }
 }
 
+function scrollToTop() {
+  const top = document.getElementById("topo");
+
+  if (top) {
+    top.scrollIntoView({ behavior: "smooth", block: "start" });
+    return;
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function reloadPublicHome() {
+  if (window.location.pathname === "/" && !window.location.search) {
+    window.location.reload();
+    return;
+  }
+
+  window.location.href = "/";
+}
+
 function Logo() {
   return (
     <div className="brand">
@@ -724,7 +744,14 @@ function SiteFooter() {
   return (
     <footer className="site-footer" id="contatos">
       <div className="footer-about">
-        <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+        <button
+          aria-label="Voltar ao topo"
+          className="footer-logo-button"
+          onClick={scrollToTop}
+          type="button"
+        >
+          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+        </button>
         <p>
           Desde 1988, a ADEHASC atua pelo desenvolvimento habitacional sustentável,
           pela regularização fundiária e pela segurança jurídica das famílias.
@@ -1254,148 +1281,154 @@ function PublicPortal({
 
   return (
     <main className="public-page">
-      <section className="window feed-window public-window">
-        <div className="window-bar public-window-bar">
-          <div className="public-window-brand">
-            <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+      <div id="topo" className="top-anchor" aria-hidden="true" />
+      <div className="window-bar public-window-bar">
+        <button
+          aria-label="Recarregar página inicial"
+          className="public-window-brand"
+          onClick={reloadPublicHome}
+          type="button"
+        >
+          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+        </button>
+        <div className="public-window-title">
+          <span>{pageTitle}</span>
+          <strong>{pageSubtitle}</strong>
+        </div>
+        <div className="public-window-actions">
+          <div className="public-tabs" role="tablist" aria-label="Navegação pública">
+            <button
+              aria-selected={section === "about"}
+              className={section === "about" ? "active" : ""}
+              onClick={openAbout}
+              role="tab"
+              type="button"
+            >
+              Sobre nós
+            </button>
+            <button
+              aria-selected={section === "news"}
+              className={section === "news" ? "active" : ""}
+              onClick={openNews}
+              role="tab"
+              type="button"
+            >
+              Notícias
+            </button>
+            <button
+              aria-selected={section === "contact"}
+              className={section === "contact" ? "active" : ""}
+              onClick={openContact}
+              role="tab"
+              type="button"
+            >
+              Contato
+            </button>
           </div>
-          <div className="public-window-title">
-            <span>{pageTitle}</span>
-            <strong>{pageSubtitle}</strong>
-          </div>
-          <div className="public-window-actions">
-            <div className="public-tabs" role="tablist" aria-label="Navegação pública">
+          <button
+            className="icon-button menu-button"
+            onClick={() => setIsMenuOpen((current) => !current)}
+            type="button"
+            title="Abrir menu"
+          >
+            <Ellipsis size={21} />
+          </button>
+          {section === "news" ? (
+            <button className="icon-button" onClick={onRefresh} type="button" title="Atualizar">
+              <RefreshCw size={18} />
+            </button>
+          ) : null}
+        </div>
+      </div>
+
+      {isMenuOpen ? (
+        <div className="settings-layer">
+          <button
+            className="settings-scrim"
+            onClick={() => setIsMenuOpen(false)}
+            type="button"
+            aria-label="Fechar menu"
+          />
+          <aside className="settings-panel">
+            <div>
+              <span>Menu</span>
+              <strong>Navegação</strong>
+            </div>
+            <nav className="nav-list" aria-label="Páginas">
               <button
-                aria-selected={section === "about"}
                 className={section === "about" ? "active" : ""}
                 onClick={openAbout}
-                role="tab"
                 type="button"
               >
-                Sobre nós
+                <FileText size={18} />
+                <span>Sobre nós</span>
               </button>
               <button
-                aria-selected={section === "news"}
                 className={section === "news" ? "active" : ""}
                 onClick={openNews}
-                role="tab"
                 type="button"
               >
-                Notícias
+                <Newspaper size={18} />
+                <span>Notícias</span>
               </button>
               <button
-                aria-selected={section === "contact"}
                 className={section === "contact" ? "active" : ""}
                 onClick={openContact}
-                role="tab"
                 type="button"
               >
-                Contato
+                <Phone size={18} />
+                <span>Contato</span>
               </button>
-            </div>
-            <button
-              className="icon-button menu-button"
-              onClick={() => setIsMenuOpen((current) => !current)}
-              type="button"
-              title="Abrir menu"
-            >
-              <Ellipsis size={21} />
-            </button>
+            </nav>
             {section === "news" ? (
-              <button className="icon-button" onClick={onRefresh} type="button" title="Atualizar">
-                <RefreshCw size={18} />
-              </button>
-            ) : null}
-          </div>
-        </div>
-
-        {isMenuOpen ? (
-          <div className="settings-layer">
-            <button
-              className="settings-scrim"
-              onClick={() => setIsMenuOpen(false)}
-              type="button"
-              aria-label="Fechar menu"
-            />
-            <aside className="settings-panel">
-              <div>
-                <span>Menu</span>
-                <strong>Navegação</strong>
-              </div>
-              <nav className="nav-list" aria-label="Páginas">
-                <button
-                  className={section === "about" ? "active" : ""}
-                  onClick={openAbout}
-                  type="button"
-                >
-                  <FileText size={18} />
-                  <span>Sobre nós</span>
-                </button>
-                <button
-                  className={section === "news" ? "active" : ""}
-                  onClick={openNews}
-                  type="button"
-                >
-                  <Newspaper size={18} />
-                  <span>Notícias</span>
-                </button>
-                <button
-                  className={section === "contact" ? "active" : ""}
-                  onClick={openContact}
-                  type="button"
-                >
-                  <Phone size={18} />
-                  <span>Contato</span>
-                </button>
-              </nav>
-              {section === "news" ? (
-                <>
-                  <div>
-                    <span>Filtros</span>
-                    <strong>Categorias</strong>
-                  </div>
-                  <nav className="nav-list" aria-label="Categorias">
-                    {categories.map((item) => (
+              <>
+                <div>
+                  <span>Filtros</span>
+                  <strong>Categorias</strong>
+                </div>
+                <nav className="nav-list" aria-label="Categorias">
+                  {categories.map((item) => (
+                    <button
+                      className={item === category ? "active" : ""}
+                      key={item}
+                      onClick={() => {
+                        setCategory(item);
+                        setSelectedId("");
+                        setIsMenuOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <Newspaper size={18} />
+                      <span>{item}</span>
+                    </button>
+                  ))}
+                </nav>
+                <div className="settings-group">
+                  <span>Tipo de mídia</span>
+                  <div className="segmented vertical">
+                    {mediaFilters.map((filter) => (
                       <button
-                        className={item === category ? "active" : ""}
-                        key={item}
+                        className={filter === mediaFilter ? "active" : ""}
+                        key={filter}
                         onClick={() => {
-                          setCategory(item);
+                          setMediaFilter(filter);
                           setSelectedId("");
                           setIsMenuOpen(false);
                         }}
                         type="button"
                       >
-                        <Newspaper size={18} />
-                        <span>{item}</span>
+                        {filter}
                       </button>
                     ))}
-                  </nav>
-                  <div className="settings-group">
-                    <span>Tipo de mídia</span>
-                    <div className="segmented vertical">
-                      {mediaFilters.map((filter) => (
-                        <button
-                          className={filter === mediaFilter ? "active" : ""}
-                          key={filter}
-                          onClick={() => {
-                            setMediaFilter(filter);
-                            setSelectedId("");
-                            setIsMenuOpen(false);
-                          }}
-                          type="button"
-                        >
-                          {filter}
-                        </button>
-                      ))}
-                    </div>
                   </div>
-                </>
-              ) : null}
-            </aside>
-          </div>
-        ) : null}
+                </div>
+              </>
+            ) : null}
+          </aside>
+        </div>
+      ) : null}
 
+      <section className="window feed-window public-window">
         {section === "about" ? (
           <AboutHome onOpenContact={openContact} onOpenNews={openNews} />
         ) : section === "contact" ? (
