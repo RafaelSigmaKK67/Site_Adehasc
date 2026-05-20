@@ -53,9 +53,6 @@ iframe {
 }
 
 .top-bar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 16px;
@@ -216,6 +213,19 @@ iframe {
   align-items: center;
   min-height: 58px;
   padding-inline: clamp(14px, 3vw, 42px);
+}
+
+.public-window-brand {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.public-window-brand img {
+  width: 126px;
+  height: 39px;
+  object-fit: contain;
+  image-rendering: auto;
 }
 
 .menu-button {
@@ -1027,6 +1037,41 @@ iframe {
   color: var(--ade-red);
 }
 
+.location-item {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  text-decoration: none;
+}
+
+.location-item svg {
+  margin-top: 2px;
+  color: var(--ade-green);
+  stroke-width: 2.7;
+}
+
+.location-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.location-text strong {
+  display: block;
+  color: #135a30;
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.location-text span {
+  display: block;
+  color: #35404a;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
 .contact-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1052,8 +1097,8 @@ iframe {
   line-height: 1.25;
 }
 
-.contact-note .contact-location strong,
-.footer-contact strong {
+.contact-note .contact-location .location-text strong,
+.footer-contact .location-text strong {
   color: #135a30;
   font-size: inherit;
   line-height: inherit;
@@ -2000,8 +2045,8 @@ div.article-cover-frame {
   color: var(--ade-red);
 }
 
-.footer-contact span,
-.footer-contact a {
+.footer-contact > span,
+.footer-contact > a {
   display: grid;
   grid-template-columns: 20px minmax(0, 1fr);
   gap: 8px;
@@ -2390,7 +2435,8 @@ div.article-cover-frame {
     padding: 7px 14px;
   }
 
-  .app-title img {
+  .app-title img,
+  .public-window-brand img {
     width: 112px;
     height: 35px;
   }
@@ -2417,7 +2463,7 @@ div.article-cover-frame {
   }
 
   .window-bar.public-window-bar {
-    grid-template-columns: 34px minmax(0, 1fr);
+    grid-template-columns: minmax(112px, auto) minmax(0, 1fr);
     row-gap: 10px;
   }
 

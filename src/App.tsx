@@ -440,6 +440,23 @@ function Logo() {
   );
 }
 
+function LocationItem({ className = "" }: { className?: string }) {
+  return (
+    <a
+      className={["location-item", className].filter(Boolean).join(" ")}
+      href={matrixMapsHref}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <MapPin size={18} />
+      <div className="location-text">
+        <strong>{matrixLabel}</strong>
+        <span>{matrixAddress}</span>
+      </div>
+    </a>
+  );
+}
+
 function StatusPill({ status }: { status: Post["status"] }) {
   return (
     <span className={`status-pill ${status}`}>
@@ -729,12 +746,7 @@ function SiteFooter() {
         <a href={contactWhatsAppHref} target="_blank" rel="noreferrer">
           <MessageCircle size={18} /> WhatsApp
         </a>
-        <a href={matrixMapsHref} target="_blank" rel="noreferrer">
-          <MapPin size={18} />
-          <span>
-            <strong>{matrixLabel}</strong>: {matrixAddress}
-          </span>
-        </a>
+        <LocationItem />
         <span>
           <BadgeCheck size={18} /> Presidente: Djalma Morell
         </span>
@@ -1090,12 +1102,7 @@ function ContactPage() {
         <strong>ADEHASC — Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina</strong>
         <span>CNPJ 78.486.875/0001-32</span>
         <span>Presidente: Djalma Morell</span>
-        <a className="contact-location" href={matrixMapsHref} target="_blank" rel="noreferrer">
-          <MapPin size={18} />
-          <span>
-            <strong>{matrixLabel}</strong>: {matrixAddress}
-          </span>
-        </a>
+        <LocationItem className="contact-location" />
       </aside>
     </section>
   );
@@ -1249,14 +1256,9 @@ function PublicPortal({
     <main className="public-page">
       <section className="window feed-window public-window">
         <div className="window-bar public-window-bar">
-          <button
-            className="icon-button menu-button"
-            onClick={() => setIsMenuOpen((current) => !current)}
-            type="button"
-            title="Abrir menu"
-          >
-            <Ellipsis size={21} />
-          </button>
+          <div className="public-window-brand">
+            <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+          </div>
           <div className="public-window-title">
             <span>{pageTitle}</span>
             <strong>{pageSubtitle}</strong>
@@ -1291,6 +1293,14 @@ function PublicPortal({
                 Contato
               </button>
             </div>
+            <button
+              className="icon-button menu-button"
+              onClick={() => setIsMenuOpen((current) => !current)}
+              type="button"
+              title="Abrir menu"
+            >
+              <Ellipsis size={21} />
+            </button>
             {section === "news" ? (
               <button className="icon-button" onClick={onRefresh} type="button" title="Atualizar">
                 <RefreshCw size={18} />
@@ -2021,18 +2031,18 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <header className="top-bar">
-        <div className="app-title">
-          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
-          <span>ADEHASC</span>
-        </div>
-        {view === "admin" ? (
+      {view === "admin" ? (
+        <header className="top-bar">
+          <div className="app-title">
+            <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+            <span>ADEHASC</span>
+          </div>
           <div className="mode-chip">
             <Pencil size={17} />
             <span>ADM</span>
           </div>
-        ) : null}
-      </header>
+        </header>
+      ) : null}
 
       {view === "admin" ? (
         adminPassword ? (
