@@ -383,24 +383,32 @@ function PostVisualFrame({
   }
 
   if (visual.kind === "video") {
+    const poster = visual.poster || "/adehasc-logo.png";
+
     return (
-      <>
+      <div className={`post-video-frame ${visual.poster ? "" : "has-fallback-poster"}`}>
         <video
           className={`post-visual-video ${isDetail ? "article-cover post-cover news-detail-image" : "post-card-image news-card-image"}`}
           src={visual.src}
-          poster={visual.poster}
+          poster={poster}
           controls={isDetail}
           muted={!isDetail}
           playsInline
           preload="metadata"
         />
+        {!visual.poster ? (
+          <span className="video-fallback-label">
+            <Video size={15} />
+            Vídeo ADEHASC
+          </span>
+        ) : null}
         {!isDetail ? (
           <span className="video-badge">
             <Video size={15} />
             Vídeo
           </span>
         ) : null}
-      </>
+      </div>
     );
   }
 
@@ -513,7 +521,7 @@ function LocationItem({ className = "" }: { className?: string }) {
       className={["location-item", className].filter(Boolean).join(" ")}
       href={matrixMapsHref}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
     >
       <MapPin size={18} />
       <div className="location-text">
@@ -867,7 +875,7 @@ function SiteFooter() {
         <a href={`mailto:${contactEmail}`}>
           <Mail size={18} /> {contactEmail}
         </a>
-        <a href={contactWhatsAppHref} target="_blank" rel="noreferrer">
+        <a href={contactWhatsAppHref} target="_blank" rel="noopener noreferrer">
           <MessageCircle size={18} /> WhatsApp
         </a>
         <LocationItem />
@@ -1268,7 +1276,7 @@ function ContactPage() {
           <MessageCircle size={28} />
           <h2>WhatsApp</h2>
           <p>Envie uma mensagem pelo WhatsApp para atendimento.</p>
-          <a className="primary-button" href={contactWhatsAppHref} target="_blank" rel="noreferrer">
+          <a className="primary-button" href={contactWhatsAppHref} target="_blank" rel="noopener noreferrer">
             Chamar no WhatsApp
             <ArrowRight size={18} />
           </a>
