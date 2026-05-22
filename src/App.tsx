@@ -260,6 +260,10 @@ function getVideoThumbnail(src: string) {
   return "";
 }
 
+function getVideoPoster(src: string) {
+  return getVideoThumbnail(src) || "/adehasc-logo.png";
+}
+
 function getVisualFromSource(src: string, videoSrc = ""): PostVisual {
   if (isDirectVideoUrl(src)) {
     return { kind: "video", src, poster: getVideoThumbnail(src) || undefined };
@@ -577,7 +581,7 @@ function MediaLightbox({
             allowFullScreen
           />
         ) : (
-          <video src={item.src} poster={getVideoThumbnail(item.src) || undefined} controls autoPlay />
+          <video src={item.src} poster={getVideoPoster(item.src)} controls autoPlay />
         )}
         {item.caption ? <p>{item.caption}</p> : null}
       </div>
@@ -612,6 +616,7 @@ function MediaViewer({
   }
 
   const embed = getVideoEmbed(item.src);
+  const videoThumbnail = getVideoThumbnail(item.src);
 
   return (
     <figure className={`media-card video-card compact-media-card ${layoutClass}`}>
@@ -622,7 +627,13 @@ function MediaViewer({
         </button>
       ) : (
         <button className="media-open" onClick={() => onOpen(item)} type="button">
-          <video src={item.src} poster={getVideoThumbnail(item.src) || undefined} muted preload="metadata" playsInline />
+          <video src={item.src} poster={videoThumbnail || "/adehasc-logo.png"} muted preload="metadata" playsInline />
+          {!videoThumbnail ? (
+            <span className="video-fallback-label">
+              <Video size={15} />
+              Vídeo ADEHASC
+            </span>
+          ) : null}
           <span>Expandir</span>
         </button>
       )}
@@ -649,7 +660,7 @@ function VideoPreview({ item }: { item: MediaItem }) {
     <video
       className="video-thumb-frame"
       src={item.src}
-      poster={getVideoThumbnail(item.src) || undefined}
+      poster={getVideoPoster(item.src)}
       controls
       muted
       preload="metadata"
