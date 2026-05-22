@@ -345,7 +345,15 @@ function PostImageFrame({
   );
 }
 
-function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "card" | "detail" }) {
+function PostVisualFrame({
+  alt = "Imagem da matéria ADEHASC",
+  visual,
+  variant,
+}: {
+  alt?: string;
+  visual: PostVisual;
+  variant: "card" | "detail";
+}) {
   const isDetail = variant === "detail";
 
   if (visual.kind === "image") {
@@ -359,7 +367,7 @@ function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "ca
 
     return (
       <PostImageFrame
-        alt=""
+        alt={alt}
         className={isDetail ? "post-image-frame-detail" : "post-image-frame-card"}
         imageClassName={imageClassName}
         src={visual.src}
@@ -399,7 +407,7 @@ function PostVisualFrame({ visual, variant }: { visual: PostVisual; variant: "ca
   return (
     <div className="video-fallback-visual post-visual-fallback">
       <Video size={isDetail ? 44 : 32} />
-      <span>Vídeo</span>
+      <span>Vídeo ADEHASC</span>
     </div>
   );
 }
@@ -450,6 +458,45 @@ function reloadPublicHome() {
   }
 
   window.location.href = "/";
+}
+
+function useRevealOnScroll(dependency: unknown) {
+  useEffect(() => {
+    const elements = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
+
+    if (!elements.length) {
+      return;
+    }
+
+    const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (shouldReduceMotion || !("IntersectionObserver" in window)) {
+      elements.forEach((element) => element.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        rootMargin: "0px 0px -8% 0px",
+        threshold: 0.12,
+      },
+    );
+
+    elements.forEach((element, index) => {
+      element.style.setProperty("--reveal-delay", `${Math.min(index * 45, 240)}ms`);
+      observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, [dependency]);
 }
 
 function Logo() {
@@ -644,47 +691,64 @@ const workAreas = [
     title: "Entrega de matrículas",
     text: "Acompanhamento até a emissão e entrega organizada das matrículas, quando cumpridos os requisitos legais.",
   },
+  {
+    icon: HeartHandshake,
+    title: "Atendimento aos moradores",
+    text: "Orientação clara para famílias, lideranças e comunidades durante as etapas de regularização.",
+  },
 ];
 
 const regularizationBenefits = [
   "Segurança jurídica",
   "Matrícula individualizada",
   "Valorização do imóvel",
-  "Venda, transferência e herança com mais tranquilidade",
-  "Organização da comunidade",
-  "Fortalecimento da cidadania",
-  "Mais dignidade para as famílias",
-  "Melhor planejamento urbano para o município",
+  "Tranquilidade para a família",
+  "Direito reconhecido",
+  "Organização urbana",
+  "Cidadania",
+  "Futuro protegido",
 ];
 
 const processSteps = [
   {
+    icon: Users,
     title: "Mobilização da comunidade",
     text: "Audiências públicas, reuniões e contato com moradores e lideranças locais.",
   },
   {
+    icon: ClipboardList,
     title: "Cadastro dos moradores",
     text: "Coleta de documentos pessoais, comprovantes, contratos, declarações e informações necessárias.",
   },
   {
+    icon: Map,
     title: "Levantamento técnico",
     text: "Topografia, mapas, identificação dos lotes, delimitação do núcleo e análise da área.",
   },
   {
-    title: "Organização jurídica e documental",
+    icon: FileCheck2,
+    title: "Organização documental",
     text: "Análise dos documentos, cartas de anuência, memoriais e demais elementos técnicos.",
   },
   {
-    title: "Protocolo e acompanhamento",
-    text: "Encaminhamento pela via adequada, seja REURB ou Lar Legal, com acompanhamento junto aos órgãos competentes.",
+    icon: Route,
+    title: "Protocolo do processo",
+    text: "Encaminhamento pela via adequada, seja REURB ou Lar Legal, junto aos órgãos competentes.",
   },
   {
+    icon: CheckCircle2,
     title: "Cumprimento de exigências",
     text: "Atendimento de despachos, exigências cartorárias, complementações técnicas e documentais.",
   },
   {
-    title: "Emissão e entrega das matrículas",
+    icon: FileText,
+    title: "Emissão das matrículas",
     text: "Após aprovação dos órgãos competentes, ocorre a emissão das matrículas individualizadas.",
+  },
+  {
+    icon: Home,
+    title: "Entrega aos moradores",
+    text: "A entrega organizada das matrículas conclui uma etapa importante de segurança jurídica.",
   },
 ];
 
@@ -724,12 +788,45 @@ const whyChooseItems = [
   },
 ];
 
+const aboutPillars = [
+  {
+    icon: CalendarDays,
+    title: "História",
+    text: "Criada em 16 de junho de 1988, a ADEHASC caminha rumo aos 40 anos de atuação institucional.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Missão",
+    text: "Promover desenvolvimento habitacional sustentável, regularização fundiária, dignidade e segurança jurídica.",
+  },
+  {
+    icon: Globe,
+    title: "Visão",
+    text: "Ser referência em regularização fundiária com responsabilidade técnica, transparência e compromisso social.",
+  },
+  {
+    icon: BadgeCheck,
+    title: "Valores",
+    text: "Segurança jurídica, dignidade, ética, transparência, respeito às famílias e parceria com municípios.",
+  },
+  {
+    icon: Route,
+    title: "Atuação",
+    text: "REURB, Programa Lar Legal, apoio documental, social, jurídico, topográfico e atendimento aos moradores.",
+  },
+  {
+    icon: HeartHandshake,
+    title: "Compromisso social",
+    text: "Mais que documentos, a regularização representa cidadania, tranquilidade e futuro protegido.",
+  },
+];
+
 const impactCards = [
-  { label: "Anos de atuação", value: "Desde 1988" },
-  { label: "Municípios atendidos", value: "215" },
-  { label: "Núcleos em regularização", value: "1.584" },
-  { label: "Matrículas emitidas", value: "Mais de 40.000" },
-  { label: "Famílias beneficiadas", value: "Mais de 50.000" },
+  { icon: CalendarDays, label: "Anos de atuação", value: "Desde 1988" },
+  { icon: Building2, label: "Municípios atendidos", value: "215" },
+  { icon: Map, label: "Núcleos em regularização", value: "1.584" },
+  { icon: FileCheck2, label: "Matrículas emitidas", value: "Mais de 40.000" },
+  { icon: Users, label: "Famílias beneficiadas", value: "Mais de 40.000" },
 ];
 
 function getStableVariant(value: string, index: number, variants: string[]) {
@@ -791,7 +888,7 @@ function AboutHome({
 }) {
   return (
     <div className="about-home">
-      <section className="about-hero">
+      <section className="about-hero reveal">
         <div className="about-copy">
           <span>Caminhando rumo aos 40 anos de história</span>
           <h1>ADEHASC: desde 1988 transformando moradia em segurança jurídica</h1>
@@ -800,6 +897,20 @@ function AboutHome({
             famílias, comunidades e municípios. Do cadastro à matrícula, a ADEHASC
             acompanha cada etapa com responsabilidade técnica e compromisso social.
           </p>
+          <div className="hero-kpis" aria-label="Destaques institucionais">
+            <span>
+              <strong>Desde 1988</strong>
+              História e responsabilidade
+            </span>
+            <span>
+              <strong>Mais de 40.000</strong>
+              Matrículas emitidas
+            </span>
+            <span>
+              <strong>215</strong>
+              Municípios atendidos
+            </span>
+          </div>
           <div className="about-actions">
             <a className="primary-button" href="#atuacao">
               <Route size={18} />
@@ -809,19 +920,25 @@ function AboutHome({
               <Phone size={17} />
               Fale com a ADEHASC
             </button>
-            <a className="ghost-button" href="#regularizacao">
-              <FileText size={17} />
-              Entenda a regularização
-            </a>
+            <button className="ghost-button" onClick={onOpenNews} type="button">
+              <Newspaper size={17} />
+              Ver notícias
+            </button>
           </div>
         </div>
 
-        <div className="about-card">
-          <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+        <div className="about-card hero-identity-card">
+          <div className="identity-logo-panel">
+            <img src="/adehasc-logo.png" srcSet={logoSrcSet} alt="ADEHASC" />
+          </div>
           <strong>
             Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina
           </strong>
           <span>CNPJ 78.486.875/0001-32</span>
+          <div className="hero-card-highlight">
+            <ShieldCheck size={21} />
+            <p>Regularização fundiária feita com responsabilidade técnica e compromisso social.</p>
+          </div>
           <div className="about-card-list">
             <span>
               <CalendarDays size={16} />
@@ -839,7 +956,7 @@ function AboutHome({
         </div>
       </section>
 
-      <section className="institutional-intro">
+      <section className="institutional-intro reveal">
         <article>
           <span>Sobre a ADEHASC</span>
           <h2>Transformando moradia em direito, insegurança em cidadania.</h2>
@@ -874,7 +991,30 @@ function AboutHome({
         </aside>
       </section>
 
-      <section className="section-block" id="atuacao">
+      <section className="about-pillars section-block reveal" aria-label="Pilares institucionais da ADEHASC">
+        <div className="section-heading">
+          <span>Sobre nós</span>
+          <h2>História, técnica e compromisso social em cada etapa</h2>
+          <p>
+            A atuação institucional da ADEHASC une orientação aos moradores, organização
+            documental, responsabilidade técnica e parceria com municípios.
+          </p>
+        </div>
+        <div className="about-pillar-grid">
+          {aboutPillars.map((item) => {
+            const Icon = item.icon;
+            return (
+              <article className="premium-card" key={item.title}>
+                <Icon size={24} />
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="section-block reveal" id="atuacao">
         <div className="section-heading">
           <span>Nossa atuação</span>
           <h2>O que a ADEHASC faz</h2>
@@ -887,7 +1027,7 @@ function AboutHome({
           {workAreas.map((item) => {
             const Icon = item.icon;
             return (
-              <article key={item.title}>
+              <article className="premium-card" key={item.title}>
                 <Icon size={24} />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
@@ -897,7 +1037,7 @@ function AboutHome({
         </div>
       </section>
 
-      <section className="regularization-section" id="regularizacao">
+      <section className="regularization-section reveal" id="regularizacao">
         <div className="section-heading">
           <span>Regularização fundiária</span>
           <h2>O que é Regularização Fundiária?</h2>
@@ -914,10 +1054,10 @@ function AboutHome({
         </div>
         <div className="benefit-grid">
           {regularizationBenefits.map((benefit) => (
-            <span key={benefit}>
+            <article className="benefit-card" key={benefit}>
               <CheckCircle2 size={17} />
-              {benefit}
-            </span>
+              <span>{benefit}</span>
+            </article>
           ))}
         </div>
         <div className="alert-note">
@@ -931,7 +1071,7 @@ function AboutHome({
         </div>
       </section>
 
-      <section className="comparison-section">
+      <section className="comparison-section reveal">
         <div className="section-heading">
           <span>Caminhos para a regularização</span>
           <h2>REURB e Lar Legal</h2>
@@ -942,7 +1082,7 @@ function AboutHome({
           </p>
         </div>
         <div className="comparison-grid">
-          <article>
+          <article className="premium-card comparison-card">
             <Landmark size={25} />
             <h3>REURB</h3>
             <ul>
@@ -953,7 +1093,7 @@ function AboutHome({
               <li>Quando cumpridos os requisitos, permite a emissão da matrícula.</li>
             </ul>
           </article>
-          <article>
+          <article className="premium-card comparison-card">
             <Scale size={25} />
             <h3>Lar Legal</h3>
             <ul>
@@ -967,7 +1107,7 @@ function AboutHome({
         </div>
       </section>
 
-      <section className="section-block">
+      <section className="section-block process-section reveal">
         <div className="section-heading">
           <span>Como trabalhamos</span>
           <h2>Da comunidade à matrícula</h2>
@@ -977,19 +1117,23 @@ function AboutHome({
           </p>
         </div>
         <ol className="process-list">
-          {processSteps.map((step, index) => (
-            <li key={step.title}>
-              <strong>{String(index + 1).padStart(2, "0")}</strong>
-              <div>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </div>
-            </li>
-          ))}
+          {processSteps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <li className="premium-card" key={step.title}>
+                <strong>{String(index + 1).padStart(2, "0")}</strong>
+                <Icon size={22} />
+                <div>
+                  <h3>{step.title}</h3>
+                  <p>{step.text}</p>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       </section>
 
-      <section className="why-section">
+      <section className="why-section reveal">
         <div className="section-heading">
           <span>Por que escolher a ADEHASC?</span>
           <h2>Regularização fundiária feita com responsabilidade</h2>
@@ -998,7 +1142,7 @@ function AboutHome({
           {whyChooseItems.map((item) => {
             const Icon = item.icon;
             return (
-              <article key={item.title}>
+              <article className="premium-card" key={item.title}>
                 <Icon size={24} />
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
@@ -1008,7 +1152,7 @@ function AboutHome({
         </div>
       </section>
 
-      <section className="transparency-section">
+      <section className="transparency-section reveal">
         <div>
           <span>Transparência</span>
           <h2>Segurança também nas condições do processo</h2>
@@ -1022,7 +1166,7 @@ function AboutHome({
         <HeartHandshake size={56} />
       </section>
 
-      <section className="impact-section">
+      <section className="impact-section reveal">
         <div className="section-heading">
           <span>História e impacto social</span>
           <h2>Uma trajetória de compromisso com as famílias</h2>
@@ -1033,12 +1177,16 @@ function AboutHome({
           </p>
         </div>
         <div className="impact-grid">
-          {impactCards.map((item) => (
-            <article key={item.label}>
-              <strong>{item.value}</strong>
-              <span>{item.label}</span>
-            </article>
-          ))}
+          {impactCards.map((item) => {
+            const Icon = item.icon;
+            return (
+              <article className="premium-card" key={item.label}>
+                <Icon size={22} />
+                <strong>{item.value}</strong>
+                <span>{item.label}</span>
+              </article>
+            );
+          })}
         </div>
         <div className="values-wrap" aria-label="Valores da ADEHASC">
           {valueItems.map((item) => (
@@ -1047,7 +1195,7 @@ function AboutHome({
         </div>
       </section>
 
-      <section className="stories-section">
+      <section className="stories-section reveal">
         <div className="section-heading">
           <span>Notícias e histórias</span>
           <h2>Entregas e atuações podem virar cases no portal</h2>
@@ -1062,7 +1210,7 @@ function AboutHome({
         </button>
       </section>
 
-      <section className="final-cta">
+      <section className="final-cta reveal">
         <div>
           <span>Fale com a ADEHASC</span>
           <h2>Quer regularizar sua comunidade ou município?</h2>
@@ -1083,7 +1231,7 @@ function AboutHome({
 function ContactPage() {
   return (
     <section className="contact-page">
-      <div className="contact-hero">
+      <div className="contact-hero reveal">
         <span>Atendimento</span>
         <h1>Fale com a ADEHASC</h1>
         <p>
@@ -1094,9 +1242,10 @@ function ContactPage() {
       </div>
 
       <div className="contact-grid" aria-label="Opções de contato">
-        <article className="contact-card">
+        <article className="contact-card premium-card reveal">
           <Mail size={28} />
           <h2>Enviar e-mail</h2>
+          <strong>{contactEmail}</strong>
           <p>Envie sua dúvida ou solicitação para nossa equipe.</p>
           <a className="primary-button" href={`mailto:${contactEmail}`}>
             Enviar e-mail
@@ -1104,9 +1253,10 @@ function ContactPage() {
           </a>
         </article>
 
-        <article className="contact-card">
+        <article className="contact-card premium-card reveal">
           <Phone size={28} />
           <h2>Ligar para a ADEHASC</h2>
+          <strong>{contactPhoneDisplay}</strong>
           <p>Fale diretamente com nossa equipe pelo telefone oficial.</p>
           <a className="primary-button" href={contactPhoneHref}>
             Ligar agora
@@ -1114,7 +1264,7 @@ function ContactPage() {
           </a>
         </article>
 
-        <article className="contact-card">
+        <article className="contact-card premium-card reveal">
           <MessageCircle size={28} />
           <h2>WhatsApp</h2>
           <p>Envie uma mensagem pelo WhatsApp para atendimento.</p>
@@ -1123,9 +1273,15 @@ function ContactPage() {
             <ArrowRight size={18} />
           </a>
         </article>
+
+        <article className="contact-card contact-location-card premium-card reveal">
+          <MapPin size={28} />
+          <h2>Localização</h2>
+          <LocationItem />
+        </article>
       </div>
 
-      <aside className="contact-note">
+      <aside className="contact-note reveal">
         <strong>ADEHASC — Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina</strong>
         <span>CNPJ 78.486.875/0001-32</span>
         <span>Presidente: Djalma Morell</span>
@@ -1150,12 +1306,12 @@ function NewsCard({
 
   return (
     <button
-      className={`news-card ${layoutClass} ${isSelected ? "selected" : ""}`}
+      className={`news-card premium-card reveal ${layoutClass} ${isSelected ? "selected" : ""}`}
       onClick={onClick}
       type="button"
     >
       <div className="news-card-cover news-card-image-wrapper post-card-image-wrapper post-visual-wrapper">
-        <PostVisualFrame visual={visual} variant="card" />
+        <PostVisualFrame alt={post.title || "Matéria ADEHASC"} visual={visual} variant="card" />
       </div>
       <div className="news-card-body">
         <span>{post.category}</span>
@@ -1222,6 +1378,8 @@ function PublicPortal({
   const selectedVisual = selectedPost ? getPostVisual(selectedPost) : null;
   const selectedCoverItem =
     selectedPost && selectedVisual ? createCoverLightboxItem(selectedPost, selectedVisual) : null;
+
+  useRevealOnScroll(`${section}-${selectedId}-${filteredPosts.length}`);
 
   useEffect(() => {
     if (!isLoading && selectedId && !filteredPosts.some((post) => post.id === selectedId)) {
@@ -1435,6 +1593,14 @@ function PublicPortal({
           <ContactPage />
         ) : (
           <section className="news-section">
+            <div className="news-hero reveal">
+              <span>Portal ADEHASC</span>
+              <h1>Notícias, matérias e registros institucionais</h1>
+              <p>
+                Acompanhe publicações sobre regularização fundiária, entregas de matrículas,
+                audiências, fotos, vídeos e ações da ADEHASC.
+              </p>
+            </div>
             <div className="command-bar public-command-bar">
               <label className="search-box">
                 <Search size={18} />
@@ -1468,7 +1634,7 @@ function PublicPortal({
             </div>
 
             {selectedPost ? (
-              <article className="reader-pane news-detail">
+              <article className="reader-pane news-detail reveal">
                 <div className="article-head">
                   <span>{selectedPost.category}</span>
                   <h1>{selectedPost.title}</h1>
@@ -1477,7 +1643,11 @@ function PublicPortal({
                 </div>
                 {selectedVisual?.kind === "video" ? (
                   <div className="cover-frame expanded-cover article-cover-frame article-cover-image-wrapper post-cover-image-wrapper post-visual-wrapper">
-                    <PostVisualFrame visual={selectedVisual} variant="detail" />
+                    <PostVisualFrame
+                      alt={selectedPost.title || "Matéria ADEHASC"}
+                      visual={selectedVisual}
+                      variant="detail"
+                    />
                   </div>
                 ) : selectedVisual ? (
                   <button
@@ -1489,7 +1659,11 @@ function PublicPortal({
                     }}
                     type="button"
                   >
-                    <PostVisualFrame visual={selectedVisual} variant="detail" />
+                    <PostVisualFrame
+                      alt={selectedPost.title || "Matéria ADEHASC"}
+                      visual={selectedVisual}
+                      variant="detail"
+                    />
                     <span className="cover-action-label">
                       {selectedCoverItem?.type === "video" ? "Abrir vídeo" : "Ampliar capa"}
                     </span>
@@ -1938,6 +2112,13 @@ function AdminEditor({
                 </button>
               </div>
               <p className="upload-hint">{uploadGuidance}</p>
+              <div className="thumbnail-guidance" role="note">
+                <Video size={18} />
+                <p>
+                  Vídeos enviados usam a própria prévia do arquivo. Links do YouTube exibem
+                  thumbnail automaticamente; outros vídeos recebem fallback visual “Vídeo ADEHASC”.
+                </p>
+              </div>
             </div>
 
             {editing.media.length > 0 ? (
@@ -1987,7 +2168,7 @@ function AdminEditor({
             <span>Prévia</span>
             <div className="admin-image-preview-wrapper">
               <PostImageFrame
-                alt=""
+                alt="Prévia da capa da matéria"
                 className="admin-image-preview-frame"
                 imageClassName="admin-image-preview"
                 src={editing.cover || "/adehasc-logo.png"}

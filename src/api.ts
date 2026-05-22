@@ -50,8 +50,8 @@ export async function fetchPosts(adminPassword?: string): Promise<Post[]> {
   const response = await fetch("/api/posts", {
     headers: adminPassword ? { "x-admin-password": adminPassword } : undefined,
   });
-  const data = await readResponse<{ posts: Post[] }>(response);
-  return data.posts;
+  const data = await readResponse<{ posts?: Post[] }>(response);
+  return Array.isArray(data.posts) ? data.posts : [];
 }
 
 export async function savePost(post: PostInput, adminPassword: string): Promise<Post> {
