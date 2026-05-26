@@ -1115,14 +1115,18 @@ iframe {
 }
 
 .contact-card {
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   min-height: 260px;
   padding: 18px;
   border: 1px solid rgba(20, 22, 25, 0.1);
   border-radius: var(--radius);
   background: #ffffff;
+}
+
+.contact-card p {
+  flex: 1;
 }
 
 .contact-card h2,
