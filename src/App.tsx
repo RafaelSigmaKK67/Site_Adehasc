@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  ArrowUpRight,
   BadgeCheck,
   Building2,
   CalendarDays,
@@ -931,6 +932,16 @@ function AboutHome({
             </span>
           </div>
           <div className="about-actions">
+            <a
+              className="hero-cadastro-button"
+              href="https://reurb.adehasc.com.br/login"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ShieldCheck size={18} />
+              <span>Acessar Centro de Cadastro</span>
+              <ArrowUpRight size={16} />
+            </a>
             <a className="primary-button" href="#atuacao">
               <Route size={18} />
               Conheça nosso trabalho

@@ -699,6 +699,7 @@ iframe {
 
 .about-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
@@ -711,6 +712,42 @@ iframe {
 
 .about-actions .primary-button {
   text-decoration: none;
+}
+
+.hero-cadastro-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 0 18px;
+  border: 1px solid rgba(220, 38, 31, 0.45);
+  border-radius: var(--radius);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--ade-red), #b8221a);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(220, 38, 31, 0.18);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
+}
+
+.hero-cadastro-button span {
+  white-space: nowrap;
+}
+
+.hero-cadastro-button:hover,
+.hero-cadastro-button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 28px rgba(220, 38, 31, 0.26);
+  filter: brightness(1.04);
+}
+
+.hero-cadastro-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 2px;
 }
 
 .about-card {
@@ -1293,8 +1330,8 @@ iframe {
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: clamp(14px, 2vw, 24px);
   align-items: stretch;
   justify-self: stretch;
   width: 100%;
@@ -1454,7 +1491,7 @@ iframe {
 .article-cover-image-wrapper,
 .post-cover-image-wrapper {
   width: min(100%, 900px);
-  max-height: 500px;
+  max-height: 520px;
   background: #ffffff;
   overflow: hidden;
   display: flex;
@@ -1598,8 +1635,8 @@ iframe {
   place-items: center;
   justify-self: center;
   width: min(100%, 900px);
-  height: clamp(200px, 34vw, 500px);
-  max-height: 500px;
+  height: clamp(200px, 34vw, 520px);
+  max-height: 520px;
   padding: 0;
   cursor: zoom-in;
 }
@@ -1619,8 +1656,8 @@ iframe {
 .article-cover-frame {
   width: 100%;
   max-width: 900px;
-  max-height: 500px;
-  margin: 0 auto;
+  max-height: 520px;
+  margin: 0 auto 32px;
 }
 
 div.article-cover-frame {
