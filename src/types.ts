@@ -10,6 +10,10 @@ export interface MediaItem {
 
 export type PostStatus = "published" | "draft";
 
+export type ImageLayout = "single" | "grid" | "carousel" | "featured" | "gallery";
+export type ImageFit = "contain" | "cover";
+export type ImageBackground = "white" | "blur" | "neutral";
+
 export interface Post {
   id: string;
   title: string;
@@ -20,6 +24,9 @@ export interface Post {
   status: PostStatus;
   featured: boolean;
   media: MediaItem[];
+  imageLayout?: ImageLayout;
+  imageFit?: ImageFit;
+  imageBackground?: ImageBackground;
   createdAt: string;
   updatedAt: string;
 }

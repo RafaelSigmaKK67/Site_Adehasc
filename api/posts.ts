@@ -1,7 +1,19 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { get, put } from "@vercel/blob";
-import type { MediaItem, MediaType, Post, PostStatus } from "../src/types";
+import type {
+  ImageBackground,
+  ImageFit,
+  ImageLayout,
+  MediaItem,
+  MediaType,
+  Post,
+  PostStatus,
+} from "../src/types";
+
+const validImageLayouts: ImageLayout[] = ["single", "grid", "carousel", "featured", "gallery"];
+const validImageFits: ImageFit[] = ["contain", "cover"];
+const validImageBackgrounds: ImageBackground[] = ["white", "blur", "neutral"];
 
 type PostPayload = Partial<Post> & {
   media?: unknown;
@@ -167,9 +179,24 @@ function normalizeMedia(media: unknown): MediaItem[] {
     .filter((item) => item.src);
 }
 
+function pickEnum<T extends string>(value: unknown, allowed: T[], fallback?: T): T | undefined {
+  if (typeof value === "string" && (allowed as string[]).includes(value)) {
+    return value as T;
+  }
+  return fallback;
+}
+
 function normalizePost(input: PostPayload, existing?: Post): Post {
   const now = new Date().toISOString();
   const status: PostStatus = input.status === "draft" ? "draft" : "published";
+
+  const imageLayout = pickEnum<ImageLayout>(input.imageLayout, validImageLayouts, existing?.imageLayout);
+  const imageFit = pickEnum<ImageFit>(input.imageFit, validImageFits, existing?.imageFit);
+  const imageBackground = pickEnum<ImageBackground>(
+    input.imageBackground,
+    validImageBackgrounds,
+    existing?.imageBackground,
+  );
 
   return {
     id: existing?.id || cleanString(input.id) || randomUUID(),
@@ -181,6 +208,9 @@ function normalizePost(input: PostPayload, existing?: Post): Post {
     status,
     featured: Boolean(input.featured),
     media: normalizeMedia(input.media),
+    ...(imageLayout ? { imageLayout } : {}),
+    ...(imageFit ? { imageFit } : {}),
+    ...(imageBackground ? { imageBackground } : {}),
     createdAt: existing?.createdAt || now,
     updatedAt: now,
   };

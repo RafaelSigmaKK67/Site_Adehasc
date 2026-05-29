@@ -49,7 +49,14 @@ import {
   uploadMedia,
 } from "./api";
 import { samplePosts } from "./samplePosts";
-import type { MediaItem, Post, PostInput } from "./types";
+import type {
+  ImageBackground,
+  ImageFit,
+  ImageLayout,
+  MediaItem,
+  Post,
+  PostInput,
+} from "./types";
 
 const categories = ["Todas", "Institucional", "Notícias", "Projetos", "Eventos"];
 const mediaFilters = ["Tudo", "Fotos", "Vídeos"];
@@ -77,6 +84,9 @@ function createBlankPost(): PostInput {
     status: "draft",
     featured: false,
     media: [],
+    imageLayout: "single",
+    imageFit: "contain",
+    imageBackground: "blur",
   };
 }
 
@@ -317,26 +327,37 @@ function PostImageFrame({
   className = "",
   imageClassName = "",
   src,
+  fit = "contain",
+  bg = "blur",
 }: {
   alt: string;
   children?: ReactNode;
   className?: string;
   imageClassName?: string;
   src: string;
+  fit?: ImageFit;
+  bg?: ImageBackground;
 }) {
-  const frameClassName = ["post-image-frame", className].filter(Boolean).join(" ");
-  const mainClassName = ["post-image-main", imageClassName].filter(Boolean).join(" ");
+  const frameClassName = ["post-image-frame", `bg-${bg}`, className]
+    .filter(Boolean)
+    .join(" ");
+  const mainClassName = ["post-image-main", `fit-${fit}`, imageClassName]
+    .filter(Boolean)
+    .join(" ");
+  const showBlurredBg = bg === "blur";
 
   return (
     <div className={frameClassName}>
-      <img
-        aria-hidden="true"
-        alt=""
-        className="post-image-bg"
-        loading="lazy"
-        onError={handleImageError}
-        src={src}
-      />
+      {showBlurredBg ? (
+        <img
+          aria-hidden="true"
+          alt=""
+          className="post-image-bg"
+          loading="lazy"
+          onError={handleImageError}
+          src={src}
+        />
+      ) : null}
       <img
         alt={alt}
         className={mainClassName}
@@ -354,10 +375,14 @@ function PostVisualFrame({
   alt = "Imagem da matéria ADEHASC",
   visual,
   variant,
+  fit,
+  bg,
 }: {
   alt?: string;
   visual: PostVisual;
   variant: "card" | "detail";
+  fit?: ImageFit;
+  bg?: ImageBackground;
 }) {
   const isDetail = variant === "detail";
 
@@ -376,6 +401,8 @@ function PostVisualFrame({
         className={isDetail ? "post-image-frame-detail" : "post-image-frame-card"}
         imageClassName={imageClassName}
         src={visual.src}
+        fit={fit}
+        bg={bg}
       >
         {visual.videoSrc && !isDetail ? (
           <span className="video-badge">
@@ -641,6 +668,302 @@ function MediaViewer({
       {item.caption ? <figcaption>{item.caption}</figcaption> : null}
     </figure>
   );
+}
+
+function PostMediaItem({
+  item,
+  fit,
+  bg,
+  onOpen,
+  size = "regular",
+}: {
+  item: MediaItem;
+  fit: ImageFit;
+  bg: ImageBackground;
+  onOpen?: (item: MediaItem) => void;
+  size?: "regular" | "thumb";
+}) {
+  const handleClick = () => onOpen?.(item);
+
+  if (item.type === "image") {
+    return (
+      <figure className={`post-media-item post-media-item-${size}`}>
+        <button
+          className="post-media-item-button"
+          onClick={handleClick}
+          type="button"
+          disabled={!onOpen}
+        >
+          <PostImageFrame
+            alt={item.caption || item.name}
+            src={item.src}
+            fit={fit}
+            bg={bg}
+          />
+          {onOpen ? <span className="post-media-item-action">Ampliar</span> : null}
+        </button>
+        {item.caption ? <figcaption>{item.caption}</figcaption> : null}
+      </figure>
+    );
+  }
+
+  const thumb = getVideoThumbnail(item.src);
+  const isEmbedded = isEmbeddedVideo(item.src);
+
+  return (
+    <figure className={`post-media-item post-media-item-video post-media-item-${size}`}>
+      <button
+        className="post-media-item-button"
+        onClick={handleClick}
+        type="button"
+        disabled={!onOpen}
+      >
+        {isEmbedded ? (
+          <div className={`post-image-frame bg-${bg} post-video-thumb-frame`}>
+            {thumb ? (
+              <img
+                className={`post-image-main fit-${fit}`}
+                alt={item.caption || item.name}
+                src={thumb}
+                loading="lazy"
+                onError={handleImageError}
+              />
+            ) : (
+              <div className="video-fallback-visual post-visual-fallback">
+                <Video size={32} />
+                <span>Vídeo ADEHASC</span>
+              </div>
+            )}
+            <span className="video-badge">
+              <Video size={15} />
+              Vídeo
+            </span>
+          </div>
+        ) : (
+          <div className={`post-image-frame bg-${bg} post-video-thumb-frame`}>
+            <video
+              className={`post-image-main fit-${fit}`}
+              src={item.src}
+              poster={thumb || "/adehasc-logo.png"}
+              muted
+              preload="metadata"
+              playsInline
+            />
+            {!thumb ? (
+              <span className="video-fallback-label">
+                <Video size={15} />
+                Vídeo ADEHASC
+              </span>
+            ) : null}
+            <span className="video-badge">
+              <Video size={15} />
+              Vídeo
+            </span>
+          </div>
+        )}
+        {onOpen ? <span className="post-media-item-action">Abrir vídeo</span> : null}
+      </button>
+      {item.caption ? <figcaption>{item.caption}</figcaption> : null}
+    </figure>
+  );
+}
+
+function PostMediaGrid({
+  media,
+  fit,
+  bg,
+  onOpen,
+  variant = "grid",
+}: {
+  media: MediaItem[];
+  fit: ImageFit;
+  bg: ImageBackground;
+  onOpen?: (item: MediaItem) => void;
+  variant?: "grid" | "gallery";
+}) {
+  if (!media.length) {
+    return null;
+  }
+  const className = variant === "gallery" ? "image-gallery-grid" : "image-grid-layout";
+  return (
+    <div className={className}>
+      {media.map((item) => (
+        <PostMediaItem
+          key={item.id}
+          item={item}
+          fit={fit}
+          bg={bg}
+          onOpen={onOpen}
+        />
+      ))}
+    </div>
+  );
+}
+
+function PostMediaFeatured({
+  media,
+  fit,
+  bg,
+  onOpen,
+}: {
+  media: MediaItem[];
+  fit: ImageFit;
+  bg: ImageBackground;
+  onOpen?: (item: MediaItem) => void;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  if (!media.length) {
+    return null;
+  }
+  const safeIndex = Math.min(activeIndex, media.length - 1);
+  const main = media[safeIndex];
+
+  return (
+    <div className="image-featured-layout">
+      <div className="image-featured-main">
+        <PostMediaItem
+          item={main}
+          fit={fit}
+          bg={bg}
+          onOpen={onOpen}
+        />
+      </div>
+      {media.length > 1 ? (
+        <div className="image-featured-thumbs" role="tablist">
+          {media.map((item, index) => (
+            <button
+              key={item.id}
+              className={`image-featured-thumb ${index === safeIndex ? "active" : ""}`}
+              onClick={() => setActiveIndex(index)}
+              type="button"
+              role="tab"
+              aria-selected={index === safeIndex}
+              aria-label={item.caption || item.name || `Imagem ${index + 1}`}
+            >
+              <PostImageFrame
+                alt={item.caption || item.name || ""}
+                src={item.type === "image" ? item.src : getVideoThumbnail(item.src) || "/adehasc-logo.png"}
+                fit={fit}
+                bg={bg}
+              />
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PostMediaCarousel({
+  media,
+  fit,
+  bg,
+  onOpen,
+}: {
+  media: MediaItem[];
+  fit: ImageFit;
+  bg: ImageBackground;
+  onOpen?: (item: MediaItem) => void;
+}) {
+  const [index, setIndex] = useState(0);
+
+  if (!media.length) {
+    return null;
+  }
+  const total = media.length;
+  const goTo = (next: number) => setIndex(((next % total) + total) % total);
+  const current = media[index];
+
+  return (
+    <div className="image-carousel">
+      <div className="image-carousel-stage">
+        <PostMediaItem
+          key={current.id}
+          item={current}
+          fit={fit}
+          bg={bg}
+          onOpen={onOpen}
+        />
+        {total > 1 ? (
+          <>
+            <button
+              className="image-carousel-arrow image-carousel-arrow-prev"
+              onClick={() => goTo(index - 1)}
+              type="button"
+              aria-label="Imagem anterior"
+            >
+              <ArrowRight size={18} style={{ transform: "rotate(180deg)" }} />
+            </button>
+            <button
+              className="image-carousel-arrow image-carousel-arrow-next"
+              onClick={() => goTo(index + 1)}
+              type="button"
+              aria-label="Próxima imagem"
+            >
+              <ArrowRight size={18} />
+            </button>
+          </>
+        ) : null}
+      </div>
+      {total > 1 ? (
+        <div className="image-carousel-dots" role="tablist">
+          {media.map((item, dotIndex) => (
+            <button
+              key={item.id}
+              className={`image-carousel-dot ${dotIndex === index ? "active" : ""}`}
+              onClick={() => goTo(dotIndex)}
+              type="button"
+              role="tab"
+              aria-selected={dotIndex === index}
+              aria-label={`Ir para imagem ${dotIndex + 1}`}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PostMediaLayout({
+  layout,
+  media,
+  fit,
+  bg,
+  onOpen,
+}: {
+  layout: ImageLayout;
+  media: MediaItem[];
+  fit: ImageFit;
+  bg: ImageBackground;
+  onOpen?: (item: MediaItem) => void;
+}) {
+  if (!media.length) {
+    return null;
+  }
+  if (layout === "single") {
+    return (
+      <PostMediaItem
+        item={media[0]}
+        fit={fit}
+        bg={bg}
+        onOpen={onOpen}
+      />
+    );
+  }
+  if (layout === "grid") {
+    return <PostMediaGrid media={media} fit={fit} bg={bg} onOpen={onOpen} variant="grid" />;
+  }
+  if (layout === "gallery") {
+    return <PostMediaGrid media={media} fit={fit} bg={bg} onOpen={onOpen} variant="gallery" />;
+  }
+  if (layout === "featured") {
+    return <PostMediaFeatured media={media} fit={fit} bg={bg} onOpen={onOpen} />;
+  }
+  if (layout === "carousel") {
+    return <PostMediaCarousel media={media} fit={fit} bg={bg} onOpen={onOpen} />;
+  }
+  return null;
 }
 
 function VideoPreview({ item }: { item: MediaItem }) {
@@ -1408,6 +1731,9 @@ function PublicPortal({
   const selectedVisual = selectedPost ? getPostVisual(selectedPost) : null;
   const selectedCoverItem =
     selectedPost && selectedVisual ? createCoverLightboxItem(selectedPost, selectedVisual) : null;
+  const selectedLayout: ImageLayout = selectedPost?.imageLayout || "single";
+  const selectedFit: ImageFit = selectedPost?.imageFit || "contain";
+  const selectedBg: ImageBackground = selectedPost?.imageBackground || "blur";
 
   useRevealOnScroll(`${section}-${selectedId}-${filteredPosts.length}`);
 
@@ -1677,6 +2003,8 @@ function PublicPortal({
                       alt={selectedPost.title || "Matéria ADEHASC"}
                       visual={selectedVisual}
                       variant="detail"
+                      fit={selectedFit}
+                      bg={selectedBg}
                     />
                   </div>
                 ) : selectedVisual ? (
@@ -1693,6 +2021,8 @@ function PublicPortal({
                       alt={selectedPost.title || "Matéria ADEHASC"}
                       visual={selectedVisual}
                       variant="detail"
+                      fit={selectedFit}
+                      bg={selectedBg}
                     />
                     <span className="cover-action-label">
                       {selectedCoverItem?.type === "video" ? "Abrir vídeo" : "Ampliar capa"}
@@ -1704,16 +2034,15 @@ function PublicPortal({
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
-                {selectedPost.media.length > 0 ? (
-                  <div className="media-grid compressed-media-grid">
-                    {selectedPost.media.map((item, index) => (
-                      <MediaViewer
-                        item={item}
-                        key={item.id}
-                        layoutClass={getStableVariant(item.id + item.src, index, mosaicClasses)}
-                        onOpen={setExpandedMedia}
-                      />
-                    ))}
+                {selectedPost.media.length > 0 && selectedLayout !== "single" ? (
+                  <div className={`post-media-stage post-media-layout-${selectedLayout}`}>
+                    <PostMediaLayout
+                      layout={selectedLayout}
+                      media={selectedPost.media}
+                      fit={selectedFit}
+                      bg={selectedBg}
+                      onOpen={setExpandedMedia}
+                    />
                   </div>
                 ) : null}
                 <button
@@ -2107,6 +2436,56 @@ function AdminEditor({
               </p>
             </div>
 
+            <fieldset className="image-config-fieldset">
+              <legend>Configuração de imagens</legend>
+              <div className="form-row">
+                <label>
+                  <span>Layout das imagens</span>
+                  <select
+                    onChange={(event) =>
+                      updateEditing("imageLayout", event.target.value as ImageLayout)
+                    }
+                    value={editing.imageLayout || "single"}
+                  >
+                    <option value="single">Imagem única</option>
+                    <option value="grid">Grade</option>
+                    <option value="carousel">Carrossel</option>
+                    <option value="featured">Destaque + miniaturas</option>
+                    <option value="gallery">Galeria simples</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Ajuste da imagem</span>
+                  <select
+                    onChange={(event) =>
+                      updateEditing("imageFit", event.target.value as ImageFit)
+                    }
+                    value={editing.imageFit || "contain"}
+                  >
+                    <option value="contain">Inteira (contain) — recomendado</option>
+                    <option value="cover">Preencher (cover) — pode cortar</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Fundo da imagem</span>
+                  <select
+                    onChange={(event) =>
+                      updateEditing("imageBackground", event.target.value as ImageBackground)
+                    }
+                    value={editing.imageBackground || "blur"}
+                  >
+                    <option value="blur">Desfocado da imagem</option>
+                    <option value="white">Branco</option>
+                    <option value="neutral">Neutro claro</option>
+                  </select>
+                </label>
+              </div>
+              <p className="image-config-hint">
+                Para logos e artes com texto, mantenha o ajuste em <strong>Inteira</strong>.
+                O ajuste <strong>Preencher</strong> pode cortar partes da imagem.
+              </p>
+            </fieldset>
+
             <div className="upload-line">
               <label className="upload-button">
                 <UploadCloud size={18} />
@@ -2195,18 +2574,33 @@ function AdminEditor({
           </form>
 
           <aside className="preview-pane">
-            <span>Prévia</span>
+            <span>Pré-visualização das imagens</span>
             <div className="admin-image-preview-wrapper">
               <PostImageFrame
                 alt="Prévia da capa da matéria"
                 className="admin-image-preview-frame"
                 imageClassName="admin-image-preview"
                 src={editing.cover || "/adehasc-logo.png"}
+                fit={editing.imageFit || "contain"}
+                bg={editing.imageBackground || "blur"}
               />
             </div>
             <h2>{editing.title || "Título da matéria"}</h2>
             <p>{editing.excerpt || "Resumo da matéria"}</p>
             <StatusPill status={editing.status} />
+            {editing.media.length > 0 && (editing.imageLayout || "single") !== "single" ? (
+              <div className="admin-layout-preview">
+                <span className="admin-layout-preview-label">
+                  Layout: {editing.imageLayout}
+                </span>
+                <PostMediaLayout
+                  layout={editing.imageLayout || "single"}
+                  media={editing.media}
+                  fit={editing.imageFit || "contain"}
+                  bg={editing.imageBackground || "blur"}
+                />
+              </div>
+            ) : null}
           </aside>
         </div>
       </section>
