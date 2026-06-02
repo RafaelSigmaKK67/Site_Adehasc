@@ -1495,6 +1495,17 @@ function AboutHome({
         </aside>
       </section>
 
+      {posts.length > 0 ? (
+        <section className="latest-posts-section reveal" aria-labelledby="latest-posts-title">
+          <div className="section-heading">
+            <span>Atualizações recentes</span>
+            <h2 id="latest-posts-title">Últimas matérias da ADEHASC</h2>
+            <p>Acompanhe as atualizações, ações e notícias mais recentes da ADEHASC.</p>
+          </div>
+          <LatestPostsCarousel posts={posts} onOpenPost={onOpenPost} />
+        </section>
+      ) : null}
+
       <section className="about-pillars section-block reveal" aria-label="Pilares institucionais da ADEHASC">
         <div className="section-heading">
           <span>Sobre nós</span>
@@ -1713,17 +1724,6 @@ function AboutHome({
           Ver notícias publicadas
         </button>
       </section>
-
-      {posts.length > 0 ? (
-        <section className="latest-posts-section reveal" aria-labelledby="latest-posts-title">
-          <div className="section-heading">
-            <span>Atualizações recentes</span>
-            <h2 id="latest-posts-title">Últimas matérias da ADEHASC</h2>
-            <p>Acompanhe as atualizações, ações e notícias mais recentes da ADEHASC.</p>
-          </div>
-          <LatestPostsCarousel posts={posts} onOpenPost={onOpenPost} />
-        </section>
-      ) : null}
 
       <section className="final-cta reveal">
         <div>
