@@ -40,7 +40,7 @@ import {
   Video,
   X,
 } from "lucide-react";
-import { type FormEvent, type ReactNode, type SyntheticEvent, useEffect, useMemo, useState } from "react";
+import { type FormEvent, type ReactNode, type SyntheticEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   deletePost,
   fetchPosts,
@@ -966,6 +966,152 @@ function PostMediaLayout({
   return null;
 }
 
+function LatestPostsCarousel({
+  posts,
+  onOpenPost,
+}: {
+  posts: Post[];
+  onOpenPost: (post: Post) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const items = useMemo(() => {
+    return [...posts]
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt).getTime() -
+          new Date(a.updatedAt || a.createdAt).getTime(),
+      )
+      .slice(0, 6);
+  }, [posts]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track || items.length === 0) {
+      return;
+    }
+    let frame = 0;
+    const handleScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const firstCard = track.firstElementChild as HTMLElement | null;
+        if (!firstCard) return;
+        const cardWidth = firstCard.offsetWidth;
+        if (cardWidth <= 0) return;
+        const index = Math.round(track.scrollLeft / cardWidth);
+        setActiveIndex(Math.min(Math.max(index, 0), items.length - 1));
+      });
+    };
+    track.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      track.removeEventListener("scroll", handleScroll);
+    };
+  }, [items.length]);
+
+  function scrollByPage(direction: 1 | -1) {
+    const track = trackRef.current;
+    if (!track) return;
+    const firstCard = track.firstElementChild as HTMLElement | null;
+    const cardWidth = firstCard ? firstCard.offsetWidth : track.clientWidth;
+    track.scrollBy({ left: direction * cardWidth, behavior: "smooth" });
+  }
+
+  function scrollToIndex(index: number) {
+    const track = trackRef.current;
+    if (!track) return;
+    const cards = Array.from(track.children) as HTMLElement[];
+    const target = cards[index];
+    if (!target) return;
+    track.scrollTo({ left: target.offsetLeft - track.offsetLeft, behavior: "smooth" });
+  }
+
+  if (items.length === 0) {
+    return (
+      <div className="latest-posts-empty" role="status">
+        Ainda não há matérias publicadas.
+      </div>
+    );
+  }
+
+  return (
+    <div className="latest-posts-carousel" role="region" aria-label="Últimas matérias da ADEHASC">
+      <div className="latest-posts-track" ref={trackRef}>
+        {items.map((post) => {
+          const visual = getPostVisual(post);
+          const coverSrc =
+            visual.kind === "image"
+              ? visual.src
+              : visual.kind === "video"
+                ? visual.poster || "/adehasc-logo.png"
+                : "/adehasc-logo.png";
+          return (
+            <article className="latest-post-card" key={post.id}>
+              <button
+                className="latest-post-card-button"
+                onClick={() => onOpenPost(post)}
+                type="button"
+              >
+                <div className="latest-post-cover">
+                  <PostImageFrame
+                    alt={post.title || "Matéria ADEHASC"}
+                    src={coverSrc}
+                    fit={post.imageFit || "contain"}
+                    bg={post.imageBackground || "blur"}
+                  />
+                </div>
+                <div className="latest-post-body">
+                  <span className="latest-post-category">{post.category}</span>
+                  <strong className="latest-post-title">{post.title || "Matéria sem título"}</strong>
+                  {post.excerpt ? <p className="latest-post-excerpt">{post.excerpt}</p> : null}
+                  <div className="latest-post-meta">
+                    <small>{formatDate(post.updatedAt)}</small>
+                    <em>Ler matéria <ArrowRight size={14} /></em>
+                  </div>
+                </div>
+              </button>
+            </article>
+          );
+        })}
+      </div>
+      {items.length > 1 ? (
+        <>
+          <button
+            className="latest-posts-arrow latest-posts-arrow-prev"
+            onClick={() => scrollByPage(-1)}
+            type="button"
+            aria-label="Matérias anteriores"
+          >
+            <ArrowRight size={18} style={{ transform: "rotate(180deg)" }} />
+          </button>
+          <button
+            className="latest-posts-arrow latest-posts-arrow-next"
+            onClick={() => scrollByPage(1)}
+            type="button"
+            aria-label="Próximas matérias"
+          >
+            <ArrowRight size={18} />
+          </button>
+          <div className="latest-posts-dots" role="tablist">
+            {items.map((post, index) => (
+              <button
+                key={post.id}
+                className={`latest-posts-dot ${index === activeIndex ? "active" : ""}`}
+                onClick={() => scrollToIndex(index)}
+                type="button"
+                role="tab"
+                aria-selected={index === activeIndex}
+                aria-label={`Ir para matéria ${index + 1}`}
+              />
+            ))}
+          </div>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 function VideoPreview({ item }: { item: MediaItem }) {
   if (isEmbeddedVideo(item.src)) {
     return (
@@ -1225,9 +1371,13 @@ function SiteFooter() {
 function AboutHome({
   onOpenContact,
   onOpenNews,
+  onOpenPost,
+  posts,
 }: {
   onOpenContact: () => void;
   onOpenNews: () => void;
+  onOpenPost: (post: Post) => void;
+  posts: Post[];
 }) {
   return (
     <div className="about-home">
@@ -1563,6 +1713,17 @@ function AboutHome({
         </button>
       </section>
 
+      {posts.length > 0 ? (
+        <section className="latest-posts-section reveal" aria-labelledby="latest-posts-title">
+          <div className="section-heading">
+            <span>Atualizações recentes</span>
+            <h2 id="latest-posts-title">Últimas matérias da ADEHASC</h2>
+            <p>Acompanhe as atualizações, ações e notícias mais recentes da ADEHASC.</p>
+          </div>
+          <LatestPostsCarousel posts={posts} onOpenPost={onOpenPost} />
+        </section>
+      ) : null}
+
       <section className="final-cta reveal">
         <div>
           <span>Fale com a ADEHASC</span>
@@ -1781,6 +1942,18 @@ function PublicPortal({
     setPublicRoute("news", post.id);
   }
 
+  function openPost(post: Post) {
+    setSection("news");
+    setSelectedId(post.id);
+    setIsMenuOpen(false);
+    setPublicRoute("news", post.id);
+  }
+
+  function closePost() {
+    setSelectedId("");
+    setPublicRoute("news");
+  }
+
   const pageTitle = {
     about: "Sobre nós",
     news: "Notícias",
@@ -1944,53 +2117,26 @@ function PublicPortal({
 
       <section className="window feed-window public-window">
         {section === "about" ? (
-          <AboutHome onOpenContact={openContact} onOpenNews={openNews} />
+          <AboutHome
+            onOpenContact={openContact}
+            onOpenNews={openNews}
+            onOpenPost={openPost}
+            posts={posts}
+          />
         ) : section === "contact" ? (
           <ContactPage />
         ) : (
-          <section className="news-section">
-            <div className="news-hero reveal">
-              <span>Portal ADEHASC</span>
-              <h1>Notícias, matérias e registros institucionais</h1>
-              <p>
-                Acompanhe publicações sobre regularização fundiária, entregas de matrículas,
-                audiências, fotos, vídeos e ações da ADEHASC.
-              </p>
-            </div>
-            <div className="command-bar public-command-bar">
-              <label className="search-box">
-                <Search size={18} />
-                <input
-                  aria-label="Pesquisar matérias"
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Pesquisar notícias"
-                  value={query}
-                />
-              </label>
-            </div>
-
-            {notice ? <div className="notice">{notice}</div> : null}
-
-            <div className="news-grid" aria-label="Lista de notícias">
-              {isLoading && filteredPosts.length === 0 ? (
-                <EmptyState text="Carregando notícias..." />
-              ) : null}
-              {!isLoading && filteredPosts.length === 0 ? (
-                <EmptyState text="Nenhuma notícia publicada nesta seleção." />
-              ) : null}
-              {filteredPosts.map((post, index) => (
-                <NewsCard
-                  isSelected={selectedPost?.id === post.id}
-                  key={post.id}
-                  layoutClass={getStableVariant(post.id + (post.cover || ""), index, newsTileClasses)}
-                  onClick={() => selectNews(post)}
-                  post={post}
-                />
-              ))}
-            </div>
-
+          <section className={`news-section ${selectedPost ? "news-section-focused" : ""}`}>
             {selectedPost ? (
-              <article className="reader-pane news-detail reveal">
+              <article className="reader-pane news-detail news-detail-focused reveal">
+                <button
+                  className="back-to-news-button ghost-button"
+                  onClick={closePost}
+                  type="button"
+                >
+                  <ArrowRight size={16} style={{ transform: "rotate(180deg)" }} />
+                  Voltar para notícias
+                </button>
                 <div className="article-head">
                   <span>{selectedPost.category}</span>
                   <h1>{selectedPost.title}</h1>
@@ -2047,20 +2193,55 @@ function PublicPortal({
                 ) : null}
                 <button
                   className="ghost-button detail-close"
-                  onClick={() => {
-                    setSelectedId("");
-                    setPublicRoute("news");
-                  }}
+                  onClick={closePost}
                   type="button"
                 >
-                  Fechar notícia
+                  <ArrowRight size={16} style={{ transform: "rotate(180deg)" }} />
+                  Voltar para notícias
                 </button>
               </article>
             ) : (
-              <div className="news-hint">
-                <Newspaper size={22} />
-                <span>Clique em uma notícia para expandir a leitura.</span>
-              </div>
+              <>
+                <div className="news-hero reveal">
+                  <span>Portal ADEHASC</span>
+                  <h1>Notícias, matérias e registros institucionais</h1>
+                  <p>
+                    Acompanhe publicações sobre regularização fundiária, entregas de matrículas,
+                    audiências, fotos, vídeos e ações da ADEHASC.
+                  </p>
+                </div>
+                <div className="command-bar public-command-bar">
+                  <label className="search-box">
+                    <Search size={18} />
+                    <input
+                      aria-label="Pesquisar matérias"
+                      onChange={(event) => setQuery(event.target.value)}
+                      placeholder="Pesquisar notícias"
+                      value={query}
+                    />
+                  </label>
+                </div>
+
+                {notice ? <div className="notice">{notice}</div> : null}
+
+                <div className="news-grid" aria-label="Lista de notícias">
+                  {isLoading && filteredPosts.length === 0 ? (
+                    <EmptyState text="Carregando notícias..." />
+                  ) : null}
+                  {!isLoading && filteredPosts.length === 0 ? (
+                    <EmptyState text="Nenhuma notícia publicada nesta seleção." />
+                  ) : null}
+                  {filteredPosts.map((post, index) => (
+                    <NewsCard
+                      isSelected={selectedId === post.id}
+                      key={post.id}
+                      layoutClass={getStableVariant(post.id + (post.cover || ""), index, newsTileClasses)}
+                      onClick={() => selectNews(post)}
+                      post={post}
+                    />
+                  ))}
+                </div>
+              </>
             )}
           </section>
         )}
