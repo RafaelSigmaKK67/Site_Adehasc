@@ -1480,8 +1480,8 @@ iframe {
 
 .article-cover-image-wrapper,
 .post-cover-image-wrapper {
-  width: min(100%, 900px);
-  max-height: 520px;
+  width: min(100%, 1100px);
+  max-height: 720px;
   background: #ffffff;
   overflow: hidden;
   display: flex;
@@ -1624,9 +1624,10 @@ iframe {
   display: grid;
   place-items: center;
   justify-self: center;
-  width: min(100%, 900px);
-  height: clamp(200px, 34vw, 520px);
-  max-height: 520px;
+  width: min(100%, 1100px);
+  height: clamp(280px, 42vw, 720px);
+  min-height: 360px;
+  max-height: 720px;
   padding: 0;
   cursor: zoom-in;
 }
@@ -1645,9 +1646,11 @@ iframe {
 
 .article-cover-frame {
   width: 100%;
-  max-width: 900px;
-  max-height: 520px;
-  margin: 0 auto 32px;
+  max-width: 1100px;
+  max-height: 720px;
+  margin: clamp(20px, 2vw, 32px) auto clamp(28px, 3vw, 40px);
+  border-radius: 18px;
+  overflow: hidden;
 }
 
 div.article-cover-frame {
@@ -2723,8 +2726,9 @@ div.article-cover-frame {
 
   .expanded-cover {
     width: 100%;
-    height: min(32vh, 240px);
-    min-height: 170px;
+    height: min(40vh, 320px);
+    min-height: 210px;
+    max-height: 360px;
   }
 
   .news-detail .article-body {
@@ -3795,14 +3799,24 @@ body {
   border-radius: 14px;
 }
 
+.post-media-item-video-inline {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
 .post-media-item-video-inline .post-image-frame {
-  border-radius: 14px;
+  aspect-ratio: 16 / 9;
+  max-height: 720px;
+  border-radius: 18px;
   overflow: hidden;
+  background: #000;
 }
 
 .post-media-item-video-inline video {
   width: 100%;
   height: 100%;
+  max-height: 720px;
   display: block;
   background: #000;
 }
@@ -3861,15 +3875,19 @@ body {
 
 .image-featured-main {
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
+}
+
+.image-featured-main .post-image-frame {
+  max-height: 720px;
 }
 
 .image-featured-thumbs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
   gap: 10px;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   width: 100%;
 }
@@ -3908,7 +3926,7 @@ body {
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
@@ -4325,37 +4343,63 @@ body {
 /* ===== Leitor focado (sem grade) ===== */
 
 .news-section-focused {
-  padding: clamp(16px, 3vw, 32px) clamp(12px, 3vw, 42px);
+  padding: clamp(20px, 3vw, 40px) clamp(12px, 3vw, 32px) clamp(28px, 4vw, 56px);
 }
 
 .news-detail-focused {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: clamp(18px, 2vw, 28px);
   width: 100%;
-  max-width: 980px;
+  max-width: 1180px;
   margin: 0 auto;
 }
 
 .news-detail-focused .article-head {
   width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .news-detail-focused .article-head h1 {
-  font-size: clamp(1.8rem, 3.4vw, 2.5rem);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.12;
+  margin: 8px 0 14px;
+}
+
+.news-detail-focused .article-head p {
+  font-size: clamp(1rem, 1.4vw, 1.18rem);
+  line-height: 1.55;
+  max-width: 900px;
+}
+
+.news-detail-focused .article-head small {
+  font-size: 0.92rem;
 }
 
 .news-detail-focused .article-body {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
+  font-size: clamp(1rem, 1.1vw, 1.08rem);
+  line-height: 1.78;
+}
+
+.news-detail-focused .article-body p {
+  margin: 0 0 18px;
+}
+
+.news-detail-focused .post-media-stage {
+  width: 100%;
+  max-width: 1100px;
+  margin: clamp(8px, 1.6vw, 18px) auto 0;
 }
 
 .news-detail-focused .detail-close {
   align-self: flex-start;
-  margin-top: 18px;
-  padding: 0 14px;
-  min-height: 40px;
+  margin-top: 24px;
+  padding: 0 18px;
+  min-height: 44px;
   border: 1px solid rgba(36, 143, 74, 0.18);
   color: var(--ade-green-dark, #135a30);
   background: #ffffff;
@@ -4364,6 +4408,17 @@ body {
 .news-detail-focused .detail-close:hover {
   border-color: rgba(36, 143, 74, 0.4);
   background: var(--ade-green-soft);
+}
+
+@media (max-width: 720px) {
+  .news-detail-focused .article-head h1 {
+    font-size: clamp(1.65rem, 6vw, 2.2rem);
+  }
+
+  .news-detail-focused .article-body {
+    font-size: 1rem;
+    line-height: 1.68;
+  }
 }
 
 /* ===== Sistemas ADEHASC na pagina de contato ===== */
