@@ -1796,6 +1796,32 @@ function ContactPage() {
         </article>
       </div>
 
+      <section
+        className="contact-systems-section reveal"
+        aria-labelledby="contact-systems-title"
+      >
+        <article className="systems-card">
+          <div className="systems-card-body">
+            <span className="section-badge">Sistemas ADEHASC</span>
+            <h2 id="contact-systems-title">Acesse o Centro de Cadastro</h2>
+            <p>
+              Acesse os sistemas digitais da ADEHASC para cadastro,
+              acompanhamento e informações sobre regularização fundiária.
+            </p>
+          </div>
+          <a
+            className="system-access-button"
+            href="https://reurb.adehasc.com.br/login"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ShieldCheck size={18} />
+            <span>Acessar Centro de Cadastro</span>
+            <ArrowUpRight size={16} />
+          </a>
+        </article>
+      </section>
+
       <aside className="contact-note reveal">
         <strong>ADEHASC — Associação para o Desenvolvimento Habitacional Sustentável de Santa Catarina</strong>
         <span>CNPJ 78.486.875/0001-32</span>
