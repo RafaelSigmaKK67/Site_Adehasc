@@ -710,15 +710,15 @@ function PostMediaItem({
   const thumb = getVideoThumbnail(item.src);
   const isEmbedded = isEmbeddedVideo(item.src);
 
-  return (
-    <figure className={`post-media-item post-media-item-video post-media-item-${size}`}>
-      <button
-        className="post-media-item-button"
-        onClick={handleClick}
-        type="button"
-        disabled={!onOpen}
-      >
-        {isEmbedded ? (
+  if (isEmbedded) {
+    return (
+      <figure className={`post-media-item post-media-item-video post-media-item-${size}`}>
+        <button
+          className="post-media-item-button"
+          onClick={handleClick}
+          type="button"
+          disabled={!onOpen}
+        >
           <div className={`post-image-frame bg-${bg} post-video-thumb-frame`}>
             {thumb ? (
               <img
@@ -739,30 +739,31 @@ function PostMediaItem({
               Vídeo
             </span>
           </div>
-        ) : (
-          <div className={`post-image-frame bg-${bg} post-video-thumb-frame`}>
-            <video
-              className={`post-image-main fit-${fit}`}
-              src={item.src}
-              poster={thumb || "/adehasc-logo.png"}
-              muted
-              preload="metadata"
-              playsInline
-            />
-            {!thumb ? (
-              <span className="video-fallback-label">
-                <Video size={15} />
-                Vídeo ADEHASC
-              </span>
-            ) : null}
-            <span className="video-badge">
-              <Video size={15} />
-              Vídeo
-            </span>
-          </div>
-        )}
-        {onOpen ? <span className="post-media-item-action">Abrir vídeo</span> : null}
-      </button>
+          {onOpen ? <span className="post-media-item-action">Abrir vídeo</span> : null}
+        </button>
+        {item.caption ? <figcaption>{item.caption}</figcaption> : null}
+      </figure>
+    );
+  }
+
+  return (
+    <figure className={`post-media-item post-media-item-video post-media-item-${size} post-media-item-video-inline`}>
+      <div className={`post-image-frame bg-${bg} post-video-thumb-frame`}>
+        <video
+          className={`post-image-main fit-${fit}`}
+          src={item.src}
+          poster={thumb || "/adehasc-logo.png"}
+          controls
+          preload="metadata"
+          playsInline
+        />
+        {!thumb ? (
+          <span className="video-fallback-label">
+            <Video size={15} />
+            Vídeo ADEHASC
+          </span>
+        ) : null}
+      </div>
       {item.caption ? <figcaption>{item.caption}</figcaption> : null}
     </figure>
   );
@@ -2180,10 +2181,14 @@ function PublicPortal({
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
-                {selectedPost.media.length > 0 && selectedLayout !== "single" ? (
-                  <div className={`post-media-stage post-media-layout-${selectedLayout}`}>
+                {selectedPost.media.length > 0 ? (
+                  <div
+                    className={`post-media-stage post-media-layout-${
+                      selectedLayout === "single" ? "gallery" : selectedLayout
+                    }`}
+                  >
                     <PostMediaLayout
-                      layout={selectedLayout}
+                      layout={selectedLayout === "single" ? "gallery" : selectedLayout}
                       media={selectedPost.media}
                       fit={selectedFit}
                       bg={selectedBg}
